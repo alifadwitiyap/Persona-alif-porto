@@ -5,6 +5,7 @@
 import { profile } from "./data/profile.js";
 import { projects, featuredProject, repoCount } from "./data/projects.js";
 import { experience } from "./data/experience.js";
+import { hallOfFame } from "./data/hall-of-fame.js";
 
 const $ = (sel, root = document) => root.querySelector(sel);
 
@@ -48,9 +49,68 @@ export function renderExperience() {
           ${e.points.map((p) => `<li>${p}</li>`).join("")}
         </ul>
         <div class="tags">${e.tags.map((t) => `<span class="tag">${t}</span>`).join("")}</div>
+        ${
+          e.more
+            ? `<a class="tl-item__more" href="${e.more}" rel="noopener" target="_blank">See more on LinkedIn</a>`
+            : ""
+        }
       </li>`
     )
     .join("");
+}
+
+/* ---------- Hall of Fame (achievements dossier) ---------- */
+export function renderHallOfFame() {
+  const deck = $(".hof__deck");
+  if (deck) deck.textContent = hallOfFame.deck;
+
+  const academicSlot = $("#hof-academic");
+  if (academicSlot) {
+    const a = hallOfFame.academic;
+    academicSlot.innerHTML = `
+      <article class="hof-academic">
+        <div class="hof-academic__stamp">
+          <span class="hof-academic__stamp-label">${a.label}</span>
+          <span class="hof-academic__gpa"><b>${a.gpa}</b><small>/ ${a.scale} GPA</small></span>
+        </div>
+        <div class="hof-academic__body">
+          <h3 class="hof-academic__degree">${a.degree}</h3>
+          <p class="hof-academic__school">${a.school} · ${a.period}</p>
+          <p class="hof-academic__thesis"><span class="hof-academic__kicker">Thesis</span> ${a.thesis}</p>
+        </div>
+      </article>`;
+  }
+
+  const awardsSlot = $("#hof-awards");
+  if (awardsSlot) {
+    awardsSlot.innerHTML = hallOfFame.awards
+      .map(
+        (w) => `
+      <li class="hof-item">
+        <span class="hof-item__rank">${w.rank}</span>
+        <span class="hof-item__title">${w.title}</span>
+        <span class="hof-item__org">${w.organizer}</span>
+        <span class="hof-item__year">${w.year}</span>
+      </li>`
+      )
+      .join("");
+  }
+
+  const pubsSlot = $("#hof-publications");
+  if (pubsSlot) {
+    pubsSlot.innerHTML = hallOfFame.publications
+      .map((p) => {
+        const inner = `
+          <span class="hof-item__badge">${p.badge}</span>
+          <span class="hof-item__title">${p.title}</span>
+          <span class="hof-item__org">${p.venue}</span>
+          <span class="hof-item__year">${p.year}</span>`;
+        return p.url
+          ? `<li class="hof-item hof-item--link"><a href="${p.url}" rel="noopener" target="_blank">${inner}</a></li>`
+          : `<li class="hof-item">${inner}</li>`;
+      })
+      .join("");
+  }
 }
 
 /* ---------- Projects ---------- */
@@ -81,7 +141,12 @@ export function renderProjects() {
   grid.innerHTML = rest
     .map(
       (p) => `
-      <article class="card" data-project="${p.id}">
+      <article class="card${p.fork ? " card--fork" : ""}" data-project="${p.id}">
+        ${
+          p.fork
+            ? `<span class="card__fork" title="Fork of a team/org repository">FORK</span>`
+            : ""
+        }
         <div class="card__top">
           <h3 class="card__title">${p.name}</h3>
           <span class="card__lang">${p.lang}</span>
@@ -113,6 +178,7 @@ export function openModal(id) {
   body.innerHTML = `
     <h3 id="modal-title">${p.name}</h3>
     <div class="tags" style="margin-bottom:var(--sp-4)">
+      ${p.fork ? `<span class="tag tag--fork">FORK</span>` : ""}
       <span class="tag">${p.lang}</span>
       <span class="tag">★ ${p.stars}</span>
       <span class="tag">${p.year}</span>
@@ -138,6 +204,7 @@ export function closeModal() {
 export function initUI() {
   renderProfile();
   renderSkills();
+  renderHallOfFame();
   renderExperience();
   renderSpotlight();
   renderProjects();

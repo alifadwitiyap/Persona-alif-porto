@@ -12,7 +12,7 @@ export const profile = {
     "T-Shaped Data Scientist \u00b7 Assistant Manager at Bank Mandiri \u00b7 " +
     "Distinction Graduate, Bangkit Academy 2022",
   tagline: "Built 4 Life[\u2665] \u2014 From real life needs to real life solutions.",
-  location: "Bandung, West Java, Indonesia",
+  location: "Jakarta, ID",
   links: {
     github: "https://github.com/alifadwitiyap",
     linkedin: "https://www.linkedin.com/in/alifadwitiyap/",
@@ -40,11 +40,15 @@ export const profile = {
     },
     {
       group: "Data & Cloud",
-      items: ["Data Engineering", "Data Warehousing", "BigQuery", "Apache Spark", "GCP", "Microsoft Fabric"],
+      items: ["Data Engineering", "Data Warehousing", "BigQuery", "Apache Spark", "GCP", "Microsoft Fabric", "Talend"],
     },
     {
       group: "Engineering",
       items: ["Back-end Development", "REST API", "Cloud Computing", "Java", "Kotlin"],
+    },
+    {
+      group: "Applied AI",
+      items: ["Agentic AI"],
     },
     {
       group: "Domain",

@@ -79,11 +79,12 @@
 }
 
 /* Red / black / white throughout — the Persona-5 brief */
-html[data-section="profile"],
-html[data-section="skills"],
-html[data-section="experience"],
-html[data-section="projects"],
-html[data-section="contact"] {
+html[data-section="identity-file"],
+html[data-section="hall-of-fame"],
+html[data-section="skill-arsenal"],
+html[data-section="mission-log"],
+html[data-section="case-files"],
+html[data-section="open-channel"] {
   --accent: var(--red);
   --accent-deep: var(--red-deep);
 }

@@ -101,54 +101,25 @@
 }
 
 /* ============================================================
-   Navigator overlay (MISSION LOG) — open/close + comic-impact
-   The controller toggles the `hidden` attribute only, so both
-   directions are driven from CSS: `display` is animated as a
-   discrete property (transition-behavior: allow-discrete), which
-   holds the box painted long enough to run a real exit fade.
+   Chapter select — active-item comic impact
+   The list is always in the document (no overlay, no open/close
+   state): the section resolver mirrors the active section onto the
+   matching row, and that row gets the kinetic treatment below.
    ============================================================ */
 
-/* Exit only: the root is always fully opaque while shown, so the overlay can
-   never get stuck at a "from" value if the compositor throttles the entry
-   transition. The entrance motion lives entirely in the child keyframes below,
-   which are self-terminating (animation-fill-mode: both). */
-.navigator {
-  opacity: 1;
-  transition-property: opacity, display;
-  transition-duration: var(--t-slow);
-  transition-timing-function: var(--ease-snap);
-  transition-behavior: allow-discrete;
-}
-.navigator[hidden] { opacity: 0; }        /* display:none still comes from components.css */
-
-/* Kinetic entrance for the panel and scrim. These are keyframes rather than
-   transitions because the panel already owns clip-path/transform in
-   components.css — a keyframe replay on every show is the reliable hook,
-   and the root fade above covers the exit for both children. */
-.navigator:not([hidden]) .navigator__panel {
-  animation: nav-panel-in var(--t-slow) var(--ease-snap) both;
-}
-@keyframes nav-panel-in {
-  from { transform: skewX(-3deg) translateY(30px) scale(0.97); opacity: 0; }
-  to   { transform: skewX(-3deg) translateY(0)    scale(1);    opacity: 1; }
-}
-.navigator:not([hidden]) .navigator__scrim {
-  animation: nav-scrim-in var(--t-med) linear both;
-}
-@keyframes nav-scrim-in { from { opacity: 0; } to { opacity: 1; } }
-
-/* ---- Comic impact on the active item ----
+/* ---- Comic impact on the active chapter ----
    Hard white panel outline + black/red offset shadow, a red speed-line that
    snaps out from the left, and a one-shot "stamp" pop on the label. The pop
-   lives on the label (not the item) so it never fights the item's skew or the
+   lives on the label (not the link) so it never fights the link's skew or the
    hover translate. */
-.navigator__item[data-active="true"] {
+
+.chapter-select__link[data-active="true"] {
   color: var(--paper);
   outline: 3px solid var(--paper);
   outline-offset: 3px;
   text-shadow: 4px 4px 0 #000, 7px 7px 0 var(--accent);
 }
-.navigator__item[data-active="true"] .navigator__label {
+.chapter-select__link[data-active="true"] .chapter-select__label {
   display: inline-block;            /* transforms need a non-inline box */
   transform-origin: left center;
   animation: nav-impact var(--t-med) var(--ease-snap) both;
@@ -158,10 +129,10 @@
   55%  { transform: scale(1.07) skewX(-3deg); }
   100% { transform: scale(1)    skewX(0deg); }
 }
-.navigator__item[data-active="true"]::before {
+.chapter-select__link[data-active="true"]::before {
   content: "";
   position: absolute;
-  left: calc(var(--gutter) * -0.55);   /* stays inside the panel gutter */
+  left: calc(var(--gutter) * -0.55);   /* stays inside the section gutter */
   top: 50%;
   width: clamp(10px, 0.7em, 26px);
   height: 0.14em;
@@ -181,11 +152,7 @@
   [data-swipe]::after { display: none; }
   .section::after { display: none; }
   .caret::after { animation: none; }
-  /* Overlay still appears instantly; the motion collapses to a colour/outline
-     change. `opacity: 1` guards against a stuck @starting-style value. */
-  .navigator { opacity: 1; transition: none; }
-  .navigator:not([hidden]) .navigator__panel,
-  .navigator:not([hidden]) .navigator__scrim,
-  .navigator__item[data-active="true"] .navigator__label { animation: none; }
-  .navigator__item[data-active="true"]::before { display: none; }
+  /* The active chapter keeps its colour/outline change; the motion collapses. */
+  .chapter-select__link[data-active="true"] .chapter-select__label { animation: none; }
+  .chapter-select__link[data-active="true"]::before { display: none; }
 }

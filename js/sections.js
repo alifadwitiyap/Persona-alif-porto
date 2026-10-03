@@ -11,7 +11,27 @@
  *      or the incumbent has fully left the viewport.
  */
 
-const SECTIONS = ["hero", "profile", "skills", "experience", "projects", "contact"];
+import { sectionMoods } from "./data/section-moods.js";
+
+const SECTIONS = [
+  "hero",
+  "identity-file",
+  "hall-of-fame",
+  "skill-arsenal",
+  "mission-log",
+  "case-files",
+  "open-channel",
+];
+
+// Old section ids -> new ids, so a deep-link/bookmark from the previous
+// vocabulary still lands on the right section (hash migration, no history churn).
+const LEGACY_HASH = {
+  profile: "identity-file",
+  skills: "skill-arsenal",
+  experience: "mission-log",
+  projects: "case-files",
+  contact: "open-channel",
+};
 
 // Two coverages closer than this are considered a tie.
 const RATIO_EPSILON = 0.02;
@@ -81,7 +101,8 @@ export function initSections({ onChange } = {}) {
     active = id;
     document.documentElement.dataset.section = id;
     const el = document.getElementById(id);
-    if (hudName && el) hudName.textContent = el.dataset.name || id;
+    const mood = sectionMoods[id];
+    if (hudName) hudName.textContent = mood?.menu?.hud || el?.dataset.name || id;
     onChange?.(id);
   };
 
@@ -206,6 +227,20 @@ export function initSections({ onChange } = {}) {
   onScroll();
 
   setActive("hero");
+
+  // Hash migration: an old deep-link (#profile, #skills, ...) maps to the new
+  // section id so bookmarks keep working. Runs once, no history entry added.
+  const hash = (location.hash || "").slice(1);
+  if (hash && LEGACY_HASH[hash]) {
+    const target = document.getElementById(LEGACY_HASH[hash]);
+    if (target) {
+      history.replaceState(null, "", `#${LEGACY_HASH[hash]}`);
+      requestAnimationFrame(() =>
+        target.scrollIntoView({ behavior: "auto", block: "start" })
+      );
+    }
+  }
+
   return {
     get active() {
       return active;
@@ -215,7 +250,7 @@ export function initSections({ onChange } = {}) {
     },
     sections: SECTIONS,
     /**
-     * Programmatic navigation used by the navigator overlay.
+     * Programmatic navigation (also available to the chapter select).
      * Scrolls the target section into view and mirrors the hash. The active
      * section itself is NOT set here: the resolver above stays the single
      * source of truth and confirms the change on the next intersection tick.

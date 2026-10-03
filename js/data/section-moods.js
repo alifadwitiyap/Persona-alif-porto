@@ -1,5 +1,5 @@
 /**
- * section-moods.js — data contract for the per-section 3D "mood".
+ * section-moods.js — SINGLE data contract for every section surface.
  *
  * DATA ONLY. This module holds no THREE.js imports and no DOM access, so any
  * lane (scene, UI, CSS-driven accents, tests) can consume the same numbers.
@@ -7,8 +7,9 @@
  * Shape (field names are part of the contract — do not rename):
  *
  *   sectionMoods[<sectionId>] = {
+ *     order: number,                     // display order (source of truth)
  *     accent: '#rrggbb',                 // brand accent used by DOM + WebGL
- *     menu: {                            // navigator overlay label
+ *     menu: {                            // chapter-select + HUD label
  *       index: string,                   // 2-digit display, e.g. '01'
  *       label: string,                   // menu label (UPPERCASE, English)
  *       hud: string,                     // short name shown in the HUD
@@ -33,6 +34,11 @@
  *
  * Clamp rules: `camX` is clamped to [-1.2, 1.2] and `focus` to [0.5, 5]
  * (see MOOD_LIMITS). `camY` is clamped to [-1.2, 1.2] for the same reason.
+ *
+ * NOTE (deliberate deviation from the chapter-select plan): this stays an
+ * OBJECT MAP, not an array, because js/scene.js derives its section list via
+ * `Object.keys(sectionMoods)`. Keeping the map shape means scene.js needs no
+ * list refactor. Order is carried explicitly in `order` AND by insertion order.
  */
 
 /** Hard limits applied to every resolved mood value. */
@@ -48,10 +54,15 @@ const clamp = (value, lo, hi) => Math.min(hi, Math.max(lo, value));
 
 /**
  * Documented table. One entry per section id, in document order:
- * hero, profile, skills, experience, projects, contact.
+ * hero, identity-file, hall-of-fame, skill-arsenal, mission-log, case-files,
+ * open-channel.
+ *
+ * `chapter-select` is intentionally NOT here: it is a navigation surface, not
+ * a content destination (no 3D mood of its own).
  */
 export const sectionMoods = {
   hero: {
+    order: 0,
     accent: BRAND_ACCENT,
     menu: { index: "00", label: "START", hud: "Start" },
     scene: { focus: 0.9, camX: 0.0, camY: 0.2, layout: "archiveCore", motion: "orbit" },
@@ -62,7 +73,8 @@ export const sectionMoods = {
       wide: { focus: 0.9, camX: 0.0, camY: 0.2 },
     },
   },
-  profile: {
+  "identity-file": {
+    order: 1,
     accent: BRAND_ACCENT,
     menu: { index: "01", label: "IDENTITY FILE", hud: "Identity File" },
     scene: { focus: 1.5, camX: -0.7, camY: 0.1, layout: "portraitFrame", motion: "orbit" },
@@ -71,36 +83,50 @@ export const sectionMoods = {
       wide: { focus: 1.4, camX: -0.9, camY: 0.1 },
     },
   },
-  skills: {
+  "hall-of-fame": {
+    order: 2,
     accent: BRAND_ACCENT,
-    menu: { index: "02", label: "SKILL ARSENAL", hud: "Skill Arsenal" },
+    menu: { index: "02", label: "HALL OF FAME", hud: "Hall of Fame" },
+    scene: { focus: 1.75, camX: 0.5, camY: 0.05, layout: "shardField", motion: "rise" },
+    presets: {
+      portrait: { focus: 1.95, camX: 0.25, camY: 0.3 },
+      wide: { focus: 1.65, camX: 0.6, camY: 0.05 },
+    },
+  },
+  "skill-arsenal": {
+    order: 3,
+    accent: BRAND_ACCENT,
+    menu: { index: "03", label: "SKILL ARSENAL", hud: "Skill Arsenal" },
     scene: { focus: 2.0, camX: 0.6, camY: -0.1, layout: "constellation", motion: "pulse" },
     presets: {
       portrait: { focus: 2.2, camX: 0.3, camY: 0.15 },
       wide: { focus: 1.9, camX: 0.75, camY: -0.1 },
     },
   },
-  experience: {
+  "mission-log": {
+    order: 4,
     accent: BRAND_ACCENT,
-    menu: { index: "03", label: "MISSION LOG", hud: "Mission Log" },
+    menu: { index: "04", label: "MISSION LOG", hud: "Mission Log" },
     scene: { focus: 2.6, camX: -0.5, camY: 0.15, layout: "timelineRail", motion: "rise" },
     presets: {
       portrait: { focus: 2.8, camX: -0.2, camY: 0.3 },
       wide: { focus: 2.5, camX: -0.65, camY: 0.15 },
     },
   },
-  projects: {
+  "case-files": {
+    order: 5,
     accent: BRAND_ACCENT,
-    menu: { index: "04", label: "CASE FILES", hud: "Case Files" },
+    menu: { index: "05", label: "CASE FILES", hud: "Case Files" },
     scene: { focus: 3.1, camX: 0.5, camY: 0.0, layout: "shardField", motion: "parallax" },
     presets: {
       portrait: { focus: 3.3, camX: 0.25, camY: 0.1 },
       wide: { focus: 3.0, camX: 0.6, camY: 0.0 },
     },
   },
-  contact: {
+  "open-channel": {
+    order: 6,
     accent: BRAND_ACCENT,
-    menu: { index: "05", label: "OPEN CHANNEL", hud: "Open Channel" },
+    menu: { index: "06", label: "OPEN CHANNEL", hud: "Open Channel" },
     scene: { focus: 3.6, camX: 0.0, camY: 0.2, layout: "archiveCore", motion: "settle" },
     presets: {
       portrait: { focus: 3.8, camX: 0.15, camY: 0.4 },
@@ -108,6 +134,27 @@ export const sectionMoods = {
     },
   },
 };
+
+/**
+ * The 6 content destinations shown in the chapter select (everything except
+ * the hero). Derived from the registry — never a second hand-kept list.
+ *
+ * Each entry is the mood plus its `id`, so consumers (chapter-select.js) can
+ * build `href="#<id>"` anchors without a second lookup. The registry keys stay
+ * the single source of truth for ids and order.
+ */
+export const CHAPTER_TARGETS = Object.entries(sectionMoods)
+  .map(([id, mood]) => ({ ...mood, id }))
+  .filter((entry) => entry.menu.index !== "00")
+  .sort((a, b) => a.order - b.order);
+
+/** Section ids in document order (registry order). */
+export const SECTION_IDS = Object.keys(sectionMoods);
+
+/** Look up one mood by section id. */
+export function getSectionMood(id) {
+  return sectionMoods[id] || null;
+}
 
 /**
  * Map a viewport to one of the three aspect presets.

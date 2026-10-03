@@ -40,24 +40,25 @@
       <span class="dot" aria-hidden="true"></span> <span class="brand__4life">4<span class="brand__heart">♥</span>LIFE</span>
     </a>
     <nav class="nav" aria-label="Sections">
-      <a href="#profile">Profile</a>
-      <a href="#skills">Skills</a>
-      <a href="#experience">Experience</a>
-      <a href="#projects">Projects</a>
-      <a href="#contact">Contact</a>
+      <a href="#identity-file">Profile</a>
+      <a href="#hall-of-fame">Hall of Fame</a>
+      <a href="#skill-arsenal">Skills</a>
+      <a href="#mission-log">Experience</a>
+      <a href="#case-files">Projects</a>
+      <a href="#open-channel">Contact</a>
     </nav>
-    <button class="menu-btn" id="menu-btn" type="button"
-            aria-haspopup="dialog" aria-controls="navigator" aria-expanded="false">
+    <a class="menu-btn" id="menu-btn" href="#chapter-select" aria-label="Jump to chapter select">
       <span class="menu-btn__bars" aria-hidden="true"></span>
       <span class="menu-btn__label">Menu</span>
-    </button>
+    </a>
     <noscript>
       <nav class="nav nav--fallback" aria-label="Sections">
-        <a href="#profile">Identity File</a>
-        <a href="#skills">Skill Arsenal</a>
-        <a href="#experience">Mission Log</a>
-        <a href="#projects">Case Files</a>
-        <a href="#contact">Open Channel</a>
+        <a href="#identity-file">Identity File</a>
+        <a href="#hall-of-fame">Hall of Fame</a>
+        <a href="#skill-arsenal">Skill Arsenal</a>
+        <a href="#mission-log">Mission Log</a>
+        <a href="#case-files">Case Files</a>
+        <a href="#open-channel">Open Channel</a>
       </nav>
     </noscript>
   </header>
@@ -75,10 +76,8 @@
           </h1>
           <p class="hero__tagline">Built 4 Life[♥] — From real life needs to real life solutions.</p>
           <div class="hero__actions">
-            <button class="btn btn--primary" id="start-btn" type="button" aria-haspopup="dialog" aria-controls="navigator">
-              Start
-            </button>
-            <a class="btn btn--primary" href="#projects">View Work</a>
+            <a class="btn btn--primary" id="start-btn" href="#chapter-select">Start</a>
+            <a class="btn btn--primary" href="#case-files">View Work</a>
             <a class="btn" href="https://github.com/alifadwitiyap" rel="noopener" target="_blank">GitHub</a>
             <a class="btn" href="https://www.linkedin.com/in/alifadwitiyap/" rel="noopener" target="_blank">LinkedIn</a>
           </div>
@@ -102,54 +101,86 @@
       </div>
     </section>
 
-    <!-- ============ 02 PROFILE ============ -->
-    <section class="section" id="profile" data-name="Identity File" aria-labelledby="profile-title">
+    <!-- ============ CHAPTER SELECT (navigator as a section, not an overlay) ============ -->
+    <section class="section chapter-select" id="chapter-select" data-name="Chapter Select"
+             aria-labelledby="chapter-select-title">
+      <div class="section__inner">
+        <span class="section__index">NAV / CHAPTER SELECT</span>
+        <h2 id="chapter-select-title" class="section__title reveal" data-swipe>Select Chapter</h2>
+        <nav aria-label="Portfolio chapters">
+          <ol class="chapter-select__list reveal--stagger" id="chapter-list"></ol>
+        </nav>
+      </div>
+    </section>
+
+    <!-- ============ 01 IDENTITY FILE ============ -->
+    <section class="section" id="identity-file" data-name="Identity File" aria-labelledby="identity-file-title">
       <div class="section__inner profile__grid">
         <div>
           <span class="section__index">01 / IDENTITY FILE</span>
-          <h2 id="profile-title" class="section__title reveal" data-swipe>Profile</h2>
+          <h2 id="identity-file-title" class="section__title reveal" data-swipe>Profile</h2>
           <div class="panel panel--tilt reveal" id="profile-panel">
             <div id="about-copy"></div>
             <div class="tags" style="margin-top:var(--sp-4)">
-              <span class="tag">Bandung, ID</span>
-              <span class="tag">Data &amp; NLP</span>
-              <span class="tag">Banking</span>
-              <span class="tag">Open to work</span>
+              <span class="tag">Jakarta, ID</span>
+              <span class="tag">AI &amp; Data</span>
+              <span class="tag">Leadership</span>
             </div>
           </div>
         </div>
         <aside class="statcard reveal" aria-label="Quick facts">
           <div class="statcard__row"><b id="stat-exp-years">2+</b><span>years at Bank Mandiri</span></div>
           <div class="statcard__row"><b>16</b><span>people led in a technical team</span></div>
-          <div class="statcard__row"><b>95%+</b><span>average score, Telkom internship</span></div>
-          <div class="statcard__row"><b>Distinction</b><span>Bangkit Academy 2022</span></div>
+          <div class="statcard__row"><b>Cum Laude</b><span>GPA 3.90 / 4.00, Telkom University</span></div>
+          <div class="statcard__row"><b>Distinction</b><span>Bangkit Academy 2022 · Top 53 project</span></div>
         </aside>
       </div>
     </section>
 
-    <!-- ============ 03 SKILLS ============ -->
-    <section class="section" id="skills" data-name="Skill Arsenal" aria-labelledby="skills-title">
+    <!-- ============ 02 HALL OF FAME ============ -->
+    <section class="section" id="hall-of-fame" data-name="Hall of Fame" aria-labelledby="hall-of-fame-title">
       <div class="section__inner">
-        <span class="section__index">02 / SKILL ARSENAL</span>
-        <h2 id="skills-title" class="section__title reveal" data-swipe>Skills</h2>
+        <span class="section__index">02 / HALL OF FAME</span>
+        <h2 id="hall-of-fame-title" class="section__title reveal" data-swipe>Hall of Fame</h2>
+        <p class="hof__deck reveal">The receipts are in.</p>
+
+        <div class="hof__academic reveal" id="hof-academic"></div>
+
+        <div class="hof__group reveal">
+          <h3 class="hof__group-title">01 / Competitive Record</h3>
+          <ol class="hof__list" id="hof-awards"></ol>
+        </div>
+
+        <div class="hof__group reveal">
+          <h3 class="hof__group-title">02 / Research Files</h3>
+          <ol class="hof__list" id="hof-publications"></ol>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 03 SKILL ARSENAL ============ -->
+    <section class="section" id="skill-arsenal" data-name="Skill Arsenal" aria-labelledby="skill-arsenal-title">
+      <div class="section__inner">
+        <span class="section__index">03 / SKILL ARSENAL</span>
+        <h2 id="skill-arsenal-title" class="section__title reveal" data-swipe>Skills</h2>
         <div id="skills-groups" class="skills reveal--stagger"></div>
       </div>
     </section>
 
-    <!-- ============ 04 EXPERIENCE (3D timeline) ============ -->
-    <section class="section" id="experience" data-name="Mission Log" aria-labelledby="experience-title">
+    <!-- ============ 04 MISSION LOG (3D timeline) ============ -->
+    <section class="section" id="mission-log" data-name="Mission Log" aria-labelledby="mission-log-title">
       <div class="section__inner">
-        <span class="section__index">03 / MISSION LOG</span>
-        <h2 id="experience-title" class="section__title reveal" data-swipe>Experience</h2>
+        <span class="section__index">04 / MISSION LOG</span>
+        <h2 id="mission-log-title" class="section__title reveal" data-swipe>Experience</h2>
         <ol class="timeline reveal--stagger" id="timeline"></ol>
       </div>
     </section>
 
-    <!-- ============ 05 PROJECTS (pinned only) ============ -->
-    <section class="section" id="projects" data-name="Case Files" aria-labelledby="projects-title">
+    <!-- ============ 05 CASE FILES (pinned only) ============ -->
+    <section class="section" id="case-files" data-name="Case Files" aria-labelledby="case-files-title">
       <div class="section__inner">
-        <span class="section__index">04 / CASE FILES</span>
-        <h2 id="projects-title" class="section__title reveal" data-swipe>Projects</h2>
+        <span class="section__index">05 / CASE FILES</span>
+        <h2 id="case-files-title" class="section__title reveal" data-swipe>Projects</h2>
 
         <div id="spotlight-slot" class="reveal"></div>
 
@@ -162,12 +193,12 @@
       </div>
     </section>
 
-    <!-- ============ 06 CONTACT ============ -->
-    <section class="section" id="contact" data-name="Open Channel" aria-labelledby="contact-title">
+    <!-- ============ 06 OPEN CHANNEL ============ -->
+    <section class="section" id="open-channel" data-name="Open Channel" aria-labelledby="open-channel-title">
       <div class="section__inner">
-        <span class="section__index">05 / OPEN CHANNEL</span>
-        <h2 id="contact-title" class="section__title reveal" data-swipe>Let's talk</h2>
-        <p class="contact__big reveal">Have a real-life problem worth solving?</p>
+        <span class="section__index">06 / OPEN CHANNEL</span>
+        <h2 id="open-channel-title" class="section__title reveal" data-swipe>Let's talk</h2>
+        <p class="contact__big reveal">Every problem has a solution. Let's find yours.</p>
         <div class="contact__links reveal">
           <a class="btn btn--primary" href="https://www.linkedin.com/in/alifadwitiyap/" rel="noopener" target="_blank">LinkedIn</a>
           <a class="btn" href="https://github.com/alifadwitiyap" rel="noopener" target="_blank">GitHub</a>
@@ -192,25 +223,6 @@
     <div class="modal__box">
       <button class="modal__close" id="modal-close" aria-label="Close">ESC ✕</button>
       <div id="modal-body"></div>
-    </div>
-  </div>
-
-  <!-- Navigator overlay: "MISSION LOG" menu (static markup, works without JS) -->
-  <div class="navigator" id="navigator" role="dialog" aria-modal="true"
-       aria-labelledby="navigator-title" hidden>
-    <div class="navigator__scrim" data-nav-close></div>
-    <div class="navigator__panel">
-      <header class="navigator__head">
-        <span class="navigator__kicker">4<span class="brand__heart">♥</span>LIFE // ARCHIVE</span>
-        <h2 class="navigator__title" id="navigator-title">Select Section</h2>
-        <button class="navigator__close" id="navigator-close" type="button" aria-label="Close menu">ESC ✕</button>
-      </header>
-
-      <ol class="navigator__list" id="navigator-list" role="list"></ol>
-
-      <footer class="navigator__hud" aria-hidden="true">
-        ↑↓ SELECT · ENTER OPEN · ESC CLOSE
-      </footer>
     </div>
   </div>
 

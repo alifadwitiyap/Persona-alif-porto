@@ -1,7 +1,10 @@
 /**
  * experience.js — real work history (source: LinkedIn profile).
- * Single source of truth for the #experience section.
+ * Single source of truth for the #mission-log section.
  * No invented numbers; only what the profile states.
+ *
+ * Field notes:
+ *   `more` (optional) — a public profile URL for a "see more" affordance.
  */
 export const experience = [
   {
@@ -36,32 +39,19 @@ export const experience = [
     tags: ["Risk Management", "Banking"],
   },
   {
-    id: "telkom",
-    org: "Telkom Indonesia",
-    role: "Data Scientist Intern",
-    period: "Sep 2022 — Sep 2023",
-    place: "Bandung · Scrum, 2-week sprints",
-    kind: "Internship · 1 yr 1 mo",
-    accent: "#ffb020",
-    points: [
-      "Shipped a wide range of data-science work: reverse geocoding, market-basket analysis, model API, recommender systems (content + collaborative), harvest-date prediction, churn prediction, voucher scraping, fraud detection, provincial food-security clustering, and stakeholder dashboards.",
-      "Earned an internship extension with a consistently average performance score above 95%.",
-    ],
-    tags: ["Python", "Machine Learning", "Recommender", "Fraud Detection", "Dashboards"],
-  },
-  {
-    id: "dts-arch",
-    org: "Digital Talent Scholarship",
-    role: "Fresh Graduate Academy — Cloud Architecting Trainee",
-    period: "Mar 2023 — Apr 2023",
+    id: "bangkit",
+    org: "Bangkit Academy 2022 — Google, GoTo & Traveloka",
+    role: "Machine Learning Path — Distinction Graduate",
+    period: "2022",
     place: "Remote",
     kind: "Apprenticeship",
     accent: "#22e0f5",
     points: [
-      "Completed a 170-hour AWS cloud-architecting program with hands-on labs and a final exam.",
-      "AWS Academy Graduate — Cloud Architecting & Cloud Foundations.",
+      "Graduated with Distinction, in the top 10% of the cohort.",
+      "Built a recommender system selected as one of the TOP 53 projects out of 433.",
     ],
-    tags: ["AWS", "Cloud"],
+    tags: ["Machine Learning", "Recommender", "Distinction", "TOP 53"],
+    more: "https://www.linkedin.com/in/alifadwitiyap/",
   },
   {
     id: "dts-dev",

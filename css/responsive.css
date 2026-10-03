@@ -15,7 +15,7 @@
   .profile__grid { grid-template-columns: 1fr; }
   .nav { display: none; } /* replaced by HUD + in-page anchors */
   /* MENU is the primary navigation on mobile: it is NOT part of .nav, so it
-     stays visible here and opens the navigator overlay. */
+     stays visible here and jumps to the chapter-select section. */
   .menu-btn { display: inline-flex; }
   /* No-JS on mobile: .nav is hidden, so the noscript fallback takes over. */
   .nav--fallback {
@@ -28,23 +28,24 @@
   .portrait-track { min-height: 0; }
   .portrait-track.is-sticky-fallback { min-height: 0; }
 
-  /* Navigator overlay: full-bleed panel, single-column list, big touch targets */
-  .navigator { padding: 0; }
-  .navigator__panel {
-    width: 100%;
-    height: 100%;
-    max-height: none;
-    clip-path: none;
-    transform: none;
-    padding: var(--sp-6) var(--gutter) var(--sp-7);
-  }
-  .navigator__list { gap: var(--sp-2); margin: var(--sp-5) 0; }
-  .navigator__list li:nth-child(even) { transform: none; } /* drop the desktop stagger */
-  .navigator__item {
+  /* Chapter select: tighter rows, big touch targets, drop the HUD tag. */
+  .chapter-select__link {
     font-size: var(--step-2);
     min-height: 56px;
+    align-items: center;
     padding: var(--sp-3) var(--sp-2);
   }
+  .chapter-select__hud { display: none; }
+
+  /* Hall of Fame: stack the stamp above the body, keep the log readable. */
+  .hof-academic { grid-template-columns: 1fr; }
+  .hof-academic__stamp {
+    margin: 0;
+    transform: rotate(-1deg);
+  }
+  .hof-academic__body { padding: var(--sp-5); }
+  .hof-item { grid-template-columns: 7.5rem minmax(0, 1fr) auto; }
+  .hof-item__org { grid-column: 2 / -1; }
 }
 
 @media (max-width: 620px) {
@@ -64,7 +65,20 @@
   /* Compact MENU trigger so it never crowds the brand on small screens */
   .menu-btn { padding: var(--sp-2) var(--sp-3); border-width: 2px; }
   .menu-btn__bars { width: 18px; }
-  .navigator__item { font-size: var(--step-1); min-height: 52px; }
+  .chapter-select__link { font-size: var(--step-1); min-height: 52px; }
+
+  /* Hall of Fame: single-column log rows so nothing overflows on phones. */
+  .hof-item {
+    grid-template-columns: 1fr auto;
+    align-items: center;
+    gap: var(--sp-1) var(--sp-3);
+  }
+  .hof-item__rank,
+  .hof-item__badge { grid-column: 1 / -1; }
+  .hof-item__title { grid-column: 1; }
+  .hof-item__org { grid-column: 1; }
+  .hof-item__year { grid-column: 2; grid-row: 2; text-align: right; }
+  .hof-academic__gpa b { font-size: var(--step-2); }
 }
 
 /* Wide screens: give the stage more breathing room */

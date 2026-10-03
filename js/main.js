@@ -5,7 +5,7 @@
  */
 import { initUI } from "./ui.js";
 import { initSections } from "./sections.js";
-import { initNavigator } from "./navigator.js";
+import { initChapterSelect } from "./chapter-select.js";
 import { initPortrait, initPortraitLayout } from "./portrait.js";
 import { createPerfTier } from "./performance.js";
 
@@ -38,25 +38,25 @@ async function init() {
 
   // 5. Sections + scene wiring
   let world = null;
-  let nav = null; // assigned just below; onChange guards with optional chaining
+  let chapters = null; // assigned just below; onChange guards with optional chaining
   const sectionsCtl = initSections({
     onChange: (id) => {
       world?.setActive(id);
-      // The resolver is the single source of truth — mirror it into the menu.
-      nav?.setActive(id);
-      // When the experience section is active, sync the 3D node to the
+      // The resolver is the single source of truth — mirror it into the
+      // chapter list (highlight only; scroll still owns the active section).
+      chapters?.setActive(id);
+      // When the mission-log section is active, sync the 3D node to the
       // timeline card nearest the viewport middle.
-      if (id === "experience") syncTimelineNode(world);
+      if (id === "mission-log") syncTimelineNode(world);
     },
   });
 
-  // 5b. Navigator overlay (menu button / START / M). Depends only on the
-  // section controller, so it also works with WebGL disabled.
-  nav = initNavigator({
-    sections: sectionsCtl,
+  // 5b. Chapter select (in-page navigator section). Depends only on the
+  // section controller, so it also works with WebGL disabled. Renders the
+  // anchor list from the registry and wires the "M" shortcut.
+  chapters = initChapterSelect({
     getActive: () => sectionsCtl.active,
   });
-  nav.setActive(sectionsCtl.active);
 
   // 6. WebGL stage — decorative, guarded, disposable
   const canvas = document.getElementById("gl");

@@ -279,7 +279,7 @@ def main():
 
     # scroll through sections
     shot(sock, "desktop-hero.png")
-    for sid in ("profile", "skills", "experience", "projects", "contact"):
+    for sid in ("identity-file", "hall-of-fame", "skill-arsenal", "mission-log", "case-files", "open-channel"):
         ev(sock, f"document.getElementById('{sid}').scrollIntoView()")
         time.sleep(0.9)
         shot(sock, f"desktop-{sid}.png")
@@ -315,7 +315,7 @@ def main():
     print("  webgl_state:", ev(sock, "document.querySelector('.stage')?.dataset.webgl"))
     print("  sections:", ev(sock, "document.querySelectorAll('main section').length"))
     shot(sock, "mobile-hero.png")
-    ev(sock, "document.getElementById('projects').scrollIntoView()")
+    ev(sock, "document.getElementById('case-files').scrollIntoView()")
     time.sleep(1.0)
     shot(sock, "mobile-projects.png")
 

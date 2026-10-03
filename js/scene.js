@@ -12,6 +12,8 @@
  *  2. Skill constellation — points that connect with lines in the skills view.
  *  3. Section warp — a fast streak burst on every section change.
  *  4. Portrait orbit — a rotating accent ring that tracks the hero portrait.
+ *  5. Hall of Fame beat — a bounded, one-shot "recognition" pulse that fires
+ *     when the hall-of-fame section becomes active, then settles back to rest.
  */
 import * as THREE from "three";
 import { EffectComposer } from "three/addons/postprocessing/EffectComposer.js";
@@ -29,6 +31,18 @@ import {
  * of truth for every camera/focus number — scene.js hardcodes none of them.
  */
 const SECTION_IDS = Object.keys(sectionMoods);
+
+/**
+ * Section ids that drive optional 3D features. Named constants (not inline
+ * string literals) so a registry rename lands in one place instead of being
+ * scattered across the controller. These MUST stay in sync with the ids in
+ * js/data/section-moods.js — that file is the single source of truth.
+ */
+const FEATURE_SECTIONS = {
+  skills: "skill-arsenal",
+  mission: "mission-log",
+  hallOfFame: "hall-of-fame",
+};
 
 const RED = 0xe51e2b;
 const PAPER = 0xf7f4ea;
@@ -245,6 +259,43 @@ export function createScene(canvas, { tier, reduced = false } = {}) {
     warpGeo.attributes.position.needsUpdate = true;
   });
 
+  /* ---------- 8. Hall of Fame beat (bounded, one-shot) ---------- */
+  // Allocated ONCE and reused on every activation — the beat never creates
+  // geometry, materials or a scene on section change. A bounded 0 → 1 → 0
+  // envelope expands a short "recognition" ring burst, then the group returns
+  // to invisible rest. Ties to the hall-of-fame registry entry.
+  const hofBeat = new THREE.Group();
+  hofBeat.position.set(0.5, 0.05, -0.6);
+  const hofRings = [];
+  for (let i = 0; i < 3; i++) {
+    const ring = new THREE.Mesh(
+      new THREE.TorusGeometry(0.9, 0.012, 6, 72),
+      new THREE.MeshBasicMaterial({ color: RED, transparent: true, opacity: 0 })
+    );
+    ring.rotation.x = Math.PI / 2;
+    hofRings.push(ring);
+    hofBeat.add(ring);
+  }
+  hofBeat.visible = false;
+  group.add(hofBeat);
+  let beatT = -1; // < 0 = idle
+  anim.push((t, dt) => {
+    if (beatT < 0) return;
+    beatT += dt * 0.0009; // ~1.1s one-shot
+    if (beatT >= 1) {
+      beatT = -1;
+      hofBeat.visible = false;
+      return;
+    }
+    hofRings.forEach((ring, i) => {
+      // Each ring gets a bounded, staggered envelope: expand + fade, never
+      // unbounded. `local` is clamped to [0, 1] so the flare cannot run away.
+      const local = Math.max(0, Math.min(1, (beatT - i * 0.12) / 0.7));
+      ring.scale.setScalar(0.7 + local * 1.1);
+      ring.material.opacity = Math.sin(local * Math.PI) * 0.5;
+    });
+  });
+
   /* ---------- Particles ---------- */
   let points = null;
   if (tier.particles > 0) {
@@ -322,14 +373,35 @@ export function createScene(canvas, { tier, reduced = false } = {}) {
     state.camXTarget = sec.camX;
     state.camYTarget = sec.camY;
     // feature toggles per section
-    constellation.visible = id === "skills";
-    timeline3d.visible = id === "experience";
+    constellation.visible = id === FEATURE_SECTIONS.skills;
+    timeline3d.visible = id === FEATURE_SECTIONS.mission;
+    // Hall of Fame: reuse the pre-allocated beat, never recreate the scene.
+    if (id === FEATURE_SECTIONS.hallOfFame) {
+      hofBeat.visible = true;
+      if (reduced) restHofBeat(); // static pose, no motion
+      else beatT = 0; // fire the one-shot recognition beat
+    } else {
+      beatT = -1;
+      hofBeat.visible = false;
+    }
     if (!reduced) warpT = 0; // fire the warp burst
   }
 
   /** Light the 3D timeline node for the Nth visible experience card. */
   function setTimelineIndex(idx) {
     tlNodes.forEach((n, i) => (n.userData.lit = i === idx ? 1 : 0));
+  }
+
+  /**
+   * Park the Hall of Fame beat at a static, legible rest pose. Used under
+   * reduced-motion so the section still reads as "recognition" without any
+   * animation loop work (the animated envelope returns early while idle).
+   */
+  function restHofBeat() {
+    hofRings.forEach((ring, i) => {
+      ring.scale.setScalar(0.7 + i * 0.55);
+      ring.material.opacity = i === 0 ? 0.5 : 0.18;
+    });
   }
 
   function resize() {
