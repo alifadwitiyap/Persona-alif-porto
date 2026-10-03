@@ -1,6 +1,9 @@
 # Ignore Comet plan-run audit artifacts (local only, not shared)
 .comet-plan/
 
+# Ignore graphify knowledge-graph artifacts (local build, regenerate with /graphify)
+graphify-out/
+
 # OS / editor
 Thumbs.db
 .DS_Store

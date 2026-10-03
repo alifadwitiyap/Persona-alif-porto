@@ -9,6 +9,16 @@
  *   sectionMoods[<sectionId>] = {
  *     order: number,                     // display order (source of truth)
  *     accent: '#rrggbb',                 // brand accent used by DOM + WebGL
+ *     progress: {                        // progress bar + menu step (v3)
+ *       step: number,                    // 0-based index in the reading journey
+ *       label: string,                   // short chapter label, e.g. 'IDENTITY FILE'
+ *     },
+ *     story: {                           // narrative microcopy (v3)
+ *       act: string,                     // one word: SIGNAL / IDENTIFY / PROVE ...
+ *       beat: string,                    // one short line shown as a kicker
+ *       transitionIn: string,            // label flashed by the cut-paper wipe in
+ *       transitionOut: string,           // label flashed by the wipe out
+ *     },
  *     menu: {                            // chapter-select + HUD label
  *       index: string,                   // 2-digit display, e.g. '01'
  *       label: string,                   // menu label (UPPERCASE, English)
@@ -64,6 +74,13 @@ export const sectionMoods = {
   hero: {
     order: 0,
     accent: BRAND_ACCENT,
+    progress: { step: 0, label: "START" },
+    story: {
+      act: "SIGNAL",
+      beat: "A signal enters the system.",
+      transitionIn: "INITIALISING",
+      transitionOut: "SIGNAL ACQUIRED",
+    },
     menu: { index: "00", label: "START", hud: "Start" },
     scene: { focus: 0.9, camX: 0.0, camY: 0.2, layout: "archiveCore", motion: "orbit" },
     presets: {
@@ -76,6 +93,13 @@ export const sectionMoods = {
   "identity-file": {
     order: 1,
     accent: BRAND_ACCENT,
+    progress: { step: 1, label: "IDENTITY FILE" },
+    story: {
+      act: "IDENTIFY",
+      beat: "The person behind the model.",
+      transitionIn: "OPEN THE FILE",
+      transitionOut: "SUBJECT CONFIRMED",
+    },
     menu: { index: "01", label: "IDENTITY FILE", hud: "Identity File" },
     scene: { focus: 1.5, camX: -0.7, camY: 0.1, layout: "portraitFrame", motion: "orbit" },
     presets: {
@@ -86,6 +110,13 @@ export const sectionMoods = {
   "hall-of-fame": {
     order: 2,
     accent: BRAND_ACCENT,
+    progress: { step: 2, label: "HALL OF FAME" },
+    story: {
+      act: "PROVE",
+      beat: "Signals become evidence.",
+      transitionIn: "OPEN THE ARCHIVE",
+      transitionOut: "CASE STATUS: RESOLVED",
+    },
     menu: { index: "02", label: "HALL OF FAME", hud: "Hall of Fame" },
     scene: { focus: 1.75, camX: 0.5, camY: 0.05, layout: "shardField", motion: "rise" },
     presets: {
@@ -96,6 +127,13 @@ export const sectionMoods = {
   "skill-arsenal": {
     order: 3,
     accent: BRAND_ACCENT,
+    progress: { step: 3, label: "SKILL ARSENAL" },
+    story: {
+      act: "ARM",
+      beat: "Tools are only useful in motion.",
+      transitionIn: "DEPLOY LOADOUT",
+      transitionOut: "ARSENAL ONLINE",
+    },
     menu: { index: "03", label: "SKILL ARSENAL", hud: "Skill Arsenal" },
     scene: { focus: 2.0, camX: 0.6, camY: -0.1, layout: "constellation", motion: "pulse" },
     presets: {
@@ -106,6 +144,13 @@ export const sectionMoods = {
   "mission-log": {
     order: 4,
     accent: BRAND_ACCENT,
+    progress: { step: 4, label: "MISSION LOG" },
+    story: {
+      act: "MOVE",
+      beat: "Every role leaves a trace.",
+      transitionIn: "ROLL FIELD LOG",
+      transitionOut: "TRACE RECORDED",
+    },
     menu: { index: "04", label: "MISSION LOG", hud: "Mission Log" },
     scene: { focus: 2.6, camX: -0.5, camY: 0.15, layout: "timelineRail", motion: "rise" },
     presets: {
@@ -116,6 +161,13 @@ export const sectionMoods = {
   "case-files": {
     order: 5,
     accent: BRAND_ACCENT,
+    progress: { step: 5, label: "CASE FILES" },
+    story: {
+      act: "DEPLOY",
+      beat: "Evidence, not decoration.",
+      transitionIn: "OPEN THE ARCHIVE",
+      transitionOut: "CASE STATUS: RESOLVED",
+    },
     menu: { index: "05", label: "CASE FILES", hud: "Case Files" },
     scene: { focus: 3.1, camX: 0.5, camY: 0.0, layout: "shardField", motion: "parallax" },
     presets: {
@@ -126,6 +178,13 @@ export const sectionMoods = {
   "open-channel": {
     order: 6,
     accent: BRAND_ACCENT,
+    progress: { step: 6, label: "OPEN CHANNEL" },
+    story: {
+      act: "CONTINUE",
+      beat: "The next signal needs a receiver.",
+      transitionIn: "OPEN THE LINE",
+      transitionOut: "CHANNEL OPEN",
+    },
     menu: { index: "06", label: "OPEN CHANNEL", hud: "Open Channel" },
     scene: { focus: 3.6, camX: 0.0, camY: 0.2, layout: "archiveCore", motion: "settle" },
     presets: {
@@ -151,9 +210,20 @@ export const CHAPTER_TARGETS = Object.entries(sectionMoods)
 /** Section ids in document order (registry order). */
 export const SECTION_IDS = Object.keys(sectionMoods);
 
+/** Total number of progress steps (the reading journey length). */
+export const PROGRESS_TOTAL = SECTION_IDS.length;
+
 /** Look up one mood by section id. */
 export function getSectionMood(id) {
   return sectionMoods[id] || null;
+}
+
+/** Resolve the 0..1 progress of a section id (0 when unknown). */
+export function progressOf(id) {
+  const mood = sectionMoods[id];
+  if (!mood) return 0;
+  const last = PROGRESS_TOTAL - 1;
+  return last > 0 ? mood.progress.step / last : 0;
 }
 
 /**

@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<!-- TEMP harness for lab/verify_menu_overlay.py — mirrors the real
+     #chapter-menu markup + topbar trigger so js/ui/menu.js can be exercised
+     in a real browser before the full v3 module graph is complete. -->
+<html lang="en" data-section="hero">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>menu overlay harness</title>
+  <link rel="stylesheet" href="../css/variables.css" />
+  <link rel="stylesheet" href="../css/base.css" />
+  <link rel="stylesheet" href="../css/components.css" />
+  <link rel="stylesheet" href="../css/overlays.css" />
+</head>
+<body>
+  <header class="topbar">
+    <button class="menu-btn" id="menu-btn" type="button"
+            aria-haspopup="dialog" aria-controls="chapter-menu" aria-expanded="false">
+      <span class="menu-btn__bars" aria-hidden="true"></span>
+      <span class="menu-btn__label">Menu</span>
+      <kbd class="menu-btn__kbd" aria-hidden="true">M</kbd>
+    </button>
+  </header>
+
+  <main>
+    <section class="section" id="hero"><h1>Hero</h1></section>
+    <section class="section chapter-select" id="chapter-select">
+      <h2>Select Chapter</h2>
+      <nav aria-label="Portfolio chapters"><ol id="chapter-list"></ol></nav>
+    </section>
+    <section class="section" id="identity-file"><h2>Identity</h2></section>
+    <section class="section" id="hall-of-fame"><h2>Hall</h2></section>
+    <section class="section" id="skill-arsenal"><h2>Skills</h2></section>
+    <section class="section" id="mission-log"><h2>Mission</h2></section>
+    <section class="section" id="case-files"><h2>Cases</h2></section>
+    <section class="section" id="open-channel"><h2>Open</h2></section>
+  </main>
+
+  <style>.section { min-height: 100vh; padding: 2rem; }</style>
+
+  <div class="chapter-menu" id="chapter-menu" role="dialog" aria-modal="true"
+       aria-labelledby="chapter-menu-title" hidden>
+    <div class="chapter-menu__scrim" data-menu-close></div>
+    <div class="chapter-menu__panel">
+      <header class="chapter-menu__head">
+        <span class="chapter-menu__kicker">4♥LIFE // ARCHIVE</span>
+        <h2 class="chapter-menu__title" id="chapter-menu-title">Select Chapter</h2>
+        <button class="chapter-menu__close" id="chapter-menu-close" type="button"
+                aria-label="Close menu">ESC ✕</button>
+      </header>
+      <ol class="chapter-menu__list" id="chapter-menu-list" role="list"></ol>
+      <footer class="chapter-menu__hud" aria-hidden="true">↑↓ SELECT · ENTER OPEN · M / ESC CLOSE</footer>
+    </div>
+  </div>
+
+  <script type="module">
+    import { initMenu } from "../js/ui/menu.js";
+    import { initChapterSelect } from "../js/chapter-select.js";
+
+    // Minimal stand-in for the resolver: goTo scrolls + mirrors the hash, and
+    // the harness then mirrors the active id into both surfaces (like main.js).
+    let active = "hero";
+    const sections = {
+      get active() { return active; },
+      goTo(id) {
+        document.getElementById(id)?.scrollIntoView({ behavior: "auto", block: "start" });
+        history.replaceState(null, "", `#${id}`);
+        active = id;
+        chapters.setActive(id);
+        menu.setActive(id);
+      },
+    };
+    const chapters = initChapterSelect({ getActive: () => active });
+    const menu = initMenu({ sections, getActive: () => active });
+    window.__menu = menu;
+  </script>
+</body>
+</html>

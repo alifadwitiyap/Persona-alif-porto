@@ -11,7 +11,7 @@
  *      or the incumbent has fully left the viewport.
  */
 
-import { sectionMoods } from "./data/section-moods.js";
+import { sectionMoods, progressOf, PROGRESS_TOTAL } from "./data/section-moods.js";
 
 const SECTIONS = [
   "hero",
@@ -103,7 +103,29 @@ export function initSections({ onChange } = {}) {
     const el = document.getElementById(id);
     const mood = sectionMoods[id];
     if (hudName) hudName.textContent = mood?.menu?.hud || el?.dataset.name || id;
+    // v3 contract: one event every surface (progress, menu, story, transitions,
+    // scene) consumes. The resolver stays the ONLY writer of this state.
+    publish(id, mood);
     onChange?.(id);
+  };
+
+  /** Emit the single source-of-truth section change event. */
+  const publish = (id, mood) => {
+    try {
+      window.dispatchEvent(
+        new CustomEvent("portfolio:sectionchange", {
+          detail: {
+            id,
+            index: mood?.progress?.step ?? 0,
+            total: PROGRESS_TOTAL,
+            progress: progressOf(id),
+            mood: mood || null,
+          },
+        })
+      );
+    } catch {
+      /* CustomEvent unavailable (very old env) — degrade silently */
+    }
   };
 
   /**

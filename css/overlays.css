@@ -1,0 +1,696 @@
+/* ============================================================
+   overlays.css — v3 chrome: progress bar, chapter menu overlay,
+   cut-paper wipe, opening screen, All-Out close, story beats.
+
+   Layering (z-index), highest wins:
+     0   .stage            WebGL stage (decorative)
+     1   .shell / .footer  page content
+     20  .topbar / .hud    fixed chrome
+     35  .chapter-wipe     cut-paper transition (under the modal)
+     40  .modal            project dossier (existing)
+     60  .chapter-menu     overlay menu (above the dossier)
+     70  .intro            opening screen (top of everything)
+
+   State contract (driven by JS, never by CSS):
+     - #chapter-progress  js/ui/progress.js sets --progress + scaleX on the
+                          fill and data-on on ticks from `portfolio:sectionchange`.
+     - #chapter-menu      shown when the [hidden] attribute is removed OR the
+                          element gets `.is-open` (both paths supported);
+                          js/ui/menu.js toggles `hidden`.
+     - #chapter-wipe      `.is-running` sweeps once per section change; also
+                          accepts `.is-in` / `.is-out` for a two-phase driver.
+     - #intro             js/intro.js removes the markup's `hidden` to show,
+                          adds `.is-done` to fade, then removes the node — so a
+                          no-JS visitor never sees the overlay at all.
+     - #allout            shown when [hidden] is removed (JS reveals it after
+                          the work has been seen) or with `.is-in`.
+   All motion collapses under prefers-reduced-motion and no state leaves
+   content stuck invisible.
+   ============================================================ */
+
+/* ============================================================
+   1. CHAPTER PROGRESS BAR  (topbar read-indicator, not a control)
+   ============================================================ */
+.chapter-progress {
+  --progress: 0; /* 0..1 — written by js/ui/progress.js */
+  flex: 1 1 auto;
+  min-width: 0;
+  max-width: 460px;
+  margin-inline: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  font-family: var(--font-mono);
+  font-size: var(--step--1);
+  letter-spacing: 0.26em;
+  text-transform: uppercase;
+  color: var(--paper-dim);
+}
+
+.chapter-progress__meta {
+  display: block;
+  color: var(--muted);
+  white-space: nowrap;
+  transition: color var(--t-med);
+}
+html:not([data-section="hero"]) .chapter-progress__meta { color: var(--paper-dim); }
+
+/* Track: asymmetric Persona-5 slant, square fallback via @supports below. */
+.chapter-progress__track {
+  position: relative;
+  display: block;
+  height: 12px;
+  background: var(--ink-3);
+  border: 2px solid var(--ink-3);
+  clip-path: polygon(0 0, 100% 0, calc(100% - 9px) 100%, 0 100%);
+  overflow: hidden;
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.6);
+}
+
+/* Fill: transform-origin left; JS writes transform: scaleX(p) inline, the
+   var() below is the no-JS / first-paint fallback. */
+.chapter-progress__fill {
+  position: absolute;
+  inset: 0;
+  transform-origin: left center;
+  transform: scaleX(var(--progress, 0));
+  background: linear-gradient(90deg, var(--red-deep), var(--accent) 65%, var(--red-hot));
+  transition: transform var(--t-med) var(--ease-snap), background var(--t-med);
+}
+/* One-shot sheen that reads as a game loading bar. */
+.chapter-progress__fill::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+  transform: translateX(-100%);
+  animation: progress-sheen 2.8s linear infinite;
+}
+
+/* Tick separators, one per reading step (7 steps: 00..06). */
+.chapter-progress__ticks {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 1fr;
+  pointer-events: none;
+}
+.chapter-progress__tick {
+  border-right: 2px solid rgba(7, 7, 9, 0.85);
+  transform: skewX(-20deg);
+  transition: background var(--t-fast);
+}
+.chapter-progress__tick:last-child { border-right: 0; }
+.chapter-progress__tick[data-on="true"] { background: rgba(247, 244, 234, 0.16); }
+
+@keyframes progress-sheen {
+  from { transform: translateX(-100%); }
+  to   { transform: translateX(100%); }
+}
+
+/* ============================================================
+   2. CHAPTER MENU OVERLAY  (#chapter-menu)
+   ============================================================ */
+.chapter-menu {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: none;
+  place-items: center;
+  padding: var(--gutter);
+}
+.chapter-menu[hidden] { display: none; }
+/* Either the [hidden] attribute is removed, or `.is-open` is added. */
+.chapter-menu.is-open,
+.chapter-menu:not([hidden]) { display: grid; }
+
+.chapter-menu__scrim {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(120% 80% at 72% 8%, rgba(229, 30, 43, 0.22), transparent 58%),
+    repeating-linear-gradient(115deg, transparent 0 30px, rgba(229, 30, 43, 0.07) 30px 32px),
+    rgba(7, 7, 9, 0.88);
+  backdrop-filter: blur(6px);
+}
+.chapter-menu.is-open .chapter-menu__scrim,
+.chapter-menu:not([hidden]) .chapter-menu__scrim {
+  animation: menu-scrim-in var(--t-med) var(--ease-out) both;
+}
+
+.chapter-menu__panel {
+  position: relative;
+  width: min(760px, 100%);
+  max-height: min(86vh, 780px);
+  overflow: auto;
+  padding: var(--sp-6) var(--sp-6) var(--sp-5);
+  background: linear-gradient(160deg, var(--ink-2), var(--ink));
+  border: 3px solid var(--accent);
+  clip-path: polygon(0 0, 100% 0, 100% calc(100% - 34px), calc(100% - 34px) 100%, 0 100%);
+  box-shadow: 10px 10px 0 #000, 16px 16px 0 var(--accent);
+}
+.chapter-menu.is-open .chapter-menu__panel,
+.chapter-menu:not([hidden]) .chapter-menu__panel {
+  animation: menu-panel-in var(--t-med) var(--ease-snap) both;
+}
+
+.chapter-menu__head {
+  position: relative;
+  margin-bottom: var(--sp-5);
+  padding-bottom: var(--sp-4);
+  border-bottom: 3px solid var(--ink-3);
+}
+.chapter-menu__kicker {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: var(--step--1);
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: var(--sp-2);
+}
+.chapter-menu__title {
+  margin: 0;
+  font-size: var(--step-3);
+  text-shadow: 4px 4px 0 #000, 7px 7px 0 var(--accent);
+}
+.chapter-menu__close {
+  position: absolute;
+  top: 0;
+  right: 0;
+  font-family: var(--font-ui);
+  font-size: var(--step-0);
+  letter-spacing: 0.1em;
+  padding: var(--sp-1) var(--sp-3);
+  color: var(--paper);
+  background: var(--ink-2);
+  border: 2px solid var(--paper);
+  clip-path: var(--clip-tag);
+  transition: color var(--t-fast), background var(--t-fast), border-color var(--t-fast);
+}
+.chapter-menu__close:hover,
+.chapter-menu__close:focus-visible {
+  color: var(--ink);
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+/* ---- Item list: rendered from the one registry by js/ui/menu.js ----
+   Rows are anchors that call sections.goTo(); the resolver still owns the
+   active state, mirrored here through [data-active]/[aria-current]. */
+.chapter-menu__list {
+  display: grid;
+  gap: var(--sp-2);
+}
+.chapter-menu__list > li { min-width: 0; }
+
+.chapter-menu__link,
+.chapter-menu__list a {
+  position: relative;
+  display: flex;
+  align-items: baseline;
+  gap: var(--sp-4);
+  width: 100%;
+  text-align: left;
+  padding: var(--sp-3) var(--sp-2);
+  border-bottom: 2px solid var(--ink-3);
+  font-family: var(--font-display);
+  font-size: var(--step-3);
+  line-height: 1;
+  text-transform: uppercase;
+  color: var(--paper-dim);
+  transform: skewX(-6deg);
+  transition: color var(--t-fast), transform var(--t-med) var(--ease-out),
+              border-color var(--t-fast), background var(--t-fast);
+}
+.chapter-menu__link:hover,
+.chapter-menu__link:focus-visible,
+.chapter-menu__list a:hover,
+.chapter-menu__list a:focus-visible {
+  color: var(--paper);
+  border-bottom-color: var(--paper);
+  background: rgba(229, 30, 43, 0.08);
+  transform: skewX(-6deg) translateX(10px);
+}
+.chapter-menu__link[data-active="true"],
+.chapter-menu__link[aria-current="true"],
+.chapter-menu__list a[data-active="true"],
+.chapter-menu__list a[aria-current="true"] {
+  color: var(--paper);
+  border-bottom-color: var(--accent);
+  /* Filled row instead of an outline: an outline on a tight list bleeds into
+     the neighbouring rows. The red hard-shadow is scoped to the label only so
+     it never smears the right-hand HUD tag. */
+  background: linear-gradient(90deg, rgba(229, 30, 43, 0.22), rgba(229, 30, 43, 0) 74%);
+}
+.chapter-menu__link[data-active="true"] .chapter-menu__label,
+.chapter-menu__list a[aria-current="true"] .chapter-menu__label {
+  text-shadow: 2px 2px 0 #000, 4px 4px 0 var(--accent);
+}
+.chapter-menu__num {
+  flex: 0 0 auto;
+  min-width: 2.6ch;
+  font-family: var(--font-mono);
+  font-size: var(--step-1);
+  color: var(--muted);
+  transition: color var(--t-fast);
+}
+.chapter-menu__link[data-active="true"] .chapter-menu__num,
+.chapter-menu__list a[aria-current="true"] .chapter-menu__num { color: var(--accent); }
+.chapter-menu__label { min-width: 0; overflow-wrap: anywhere; }
+/* Per-item HUD tag (menu.js renders <span class="chapter-menu__hud"> inside the
+   link). Scoped so it never collides with the panel footer, which also uses
+   .chapter-menu__hud. */
+.chapter-menu__link .chapter-menu__hud {
+  margin-left: auto;
+  font-family: var(--font-mono);
+  font-size: var(--step--1);
+  letter-spacing: 0.12em;
+  text-transform: none;
+  color: var(--muted);
+}
+
+/* Staggered entrance for the rows. */
+.chapter-menu.is-open .chapter-menu__list > li,
+.chapter-menu:not([hidden]) .chapter-menu__list > li {
+  animation: menu-item-in var(--t-med) var(--ease-snap) both;
+}
+.chapter-menu.is-open .chapter-menu__list > li:nth-child(1),
+.chapter-menu:not([hidden]) .chapter-menu__list > li:nth-child(1) { animation-delay: 40ms; }
+.chapter-menu.is-open .chapter-menu__list > li:nth-child(2),
+.chapter-menu:not([hidden]) .chapter-menu__list > li:nth-child(2) { animation-delay: 80ms; }
+.chapter-menu.is-open .chapter-menu__list > li:nth-child(3),
+.chapter-menu:not([hidden]) .chapter-menu__list > li:nth-child(3) { animation-delay: 120ms; }
+.chapter-menu.is-open .chapter-menu__list > li:nth-child(4),
+.chapter-menu:not([hidden]) .chapter-menu__list > li:nth-child(4) { animation-delay: 160ms; }
+.chapter-menu.is-open .chapter-menu__list > li:nth-child(5),
+.chapter-menu:not([hidden]) .chapter-menu__list > li:nth-child(5) { animation-delay: 200ms; }
+.chapter-menu.is-open .chapter-menu__list > li:nth-child(6),
+.chapter-menu:not([hidden]) .chapter-menu__list > li:nth-child(6) { animation-delay: 240ms; }
+.chapter-menu.is-open .chapter-menu__list > li:nth-child(7),
+.chapter-menu:not([hidden]) .chapter-menu__list > li:nth-child(7) { animation-delay: 280ms; }
+
+/* Panel footer legend (a direct child of the panel; the per-item HUD tags are
+   scoped separately above so the two never share declarations). */
+.chapter-menu__panel > .chapter-menu__hud {
+  margin-top: var(--sp-5);
+  padding-top: var(--sp-3);
+  border-top: 2px solid var(--ink-3);
+  font-family: var(--font-mono);
+  font-size: var(--step--1);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+@keyframes menu-scrim-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes menu-panel-in {
+  from { opacity: 0; transform: translateX(6%) skewX(6deg) scale(0.98); }
+  to   { opacity: 1; transform: translateX(0) skewX(0deg) scale(1); }
+}
+@keyframes menu-item-in {
+  from { opacity: 0; transform: translateX(-18px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+/* ============================================================
+   3. CUT-PAPER TRANSITION WIPE  (#chapter-wipe)
+   Sweeps once on section change. Decorative, never blocks input.
+   ============================================================ */
+.chapter-wipe {
+  position: fixed;
+  inset: 0;
+  z-index: 35;
+  pointer-events: none; /* must never trap scroll or clicks */
+  overflow: hidden;
+  visibility: hidden;
+}
+.chapter-wipe.is-running,
+.chapter-wipe.is-in,
+.chapter-wipe.is-out { visibility: visible; }
+
+/* Abstract torn-paper shard: red face with a jagged leading edge.
+   js/ui/transitions.js publishes --transition-accent (active chapter accent)
+   and --transition-direction (-1 upward / 1 downward); both are honoured with
+   the brand red / downward sweep as the fallback. */
+.chapter-wipe__panel {
+  position: absolute;
+  top: -25%;
+  bottom: -25%;
+  left: -15%;
+  right: -15%;
+  background: linear-gradient(
+    100deg,
+    var(--red-deep),
+    var(--transition-accent, var(--accent)) 42%,
+    var(--transition-accent, var(--accent)) 50%,
+    #0b0b0f 51%,
+    #0b0b0f 100%
+  );
+  clip-path: polygon(
+    0 0, 100% 0, 100% 16%, 95% 24%, 100% 34%, 96% 46%, 100% 56%,
+    94% 66%, 100% 76%, 97% 86%, 100% 100%, 0 100%,
+    5% 88%, 0 74%, 4% 60%, 0 46%, 5% 32%, 0 18%
+  );
+  transform: translateX(calc(-135% * var(--transition-direction, 1))) skewX(-8deg);
+}
+.chapter-wipe.is-running .chapter-wipe__panel {
+  animation: wipe-pass var(--t-slow) var(--ease-snap) both;
+}
+.chapter-wipe.is-in .chapter-wipe__panel { animation: wipe-in var(--t-med) var(--ease-snap) both; }
+.chapter-wipe.is-out .chapter-wipe__panel { animation: wipe-out var(--t-med) var(--ease-snap) both; }
+
+.chapter-wipe__label {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) skewX(-8deg);
+  font-family: var(--font-display);
+  font-size: var(--step-3);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--paper);
+  text-shadow: 4px 4px 0 #000, 7px 7px 0 var(--accent);
+  white-space: nowrap;
+  opacity: 0;
+}
+.chapter-wipe.is-running .chapter-wipe__label { animation: wipe-label var(--t-slow) var(--ease-snap) both; }
+.chapter-wipe.is-in .chapter-wipe__label { animation: wipe-label var(--t-med) var(--ease-snap) both; }
+.chapter-wipe.is-out .chapter-wipe__label { animation: wipe-label var(--t-med) var(--ease-snap) both; }
+
+@keyframes wipe-pass {
+  0%   { transform: translateX(calc(-135% * var(--transition-direction, 1))) skewX(-8deg); }
+  55%  { transform: translateX(0) skewX(-8deg); }
+  100% { transform: translateX(calc(135% * var(--transition-direction, 1))) skewX(-8deg); }
+}
+@keyframes wipe-in {
+  from { transform: translateX(calc(-135% * var(--transition-direction, 1))) skewX(-8deg); }
+  to   { transform: translateX(0) skewX(-8deg); }
+}
+@keyframes wipe-out {
+  from { transform: translateX(0) skewX(-8deg); }
+  to   { transform: translateX(calc(135% * var(--transition-direction, 1))) skewX(-8deg); }
+}
+@keyframes wipe-label {
+  0%   { opacity: 0; transform: translate(-50%, -50%) skewX(-8deg) scale(0.9); }
+  45%  { opacity: 1; transform: translate(-50%, -50%) skewX(-8deg) scale(1); }
+  100% { opacity: 0; transform: translate(-50%, -50%) skewX(-8deg) scale(1.04); }
+}
+
+/* ============================================================
+   4. OPENING / LOADING SCREEN  (#intro)
+   js/intro.js OWNS visibility: the markup carries `hidden` (flash-free),
+   the module removes it to show, adds `.is-done` to fade, then removes the
+   node. No-JS therefore never sees the overlay at all.
+   ============================================================ */
+.intro {
+  position: fixed;
+  inset: 0;
+  z-index: 70;
+  display: grid;
+  place-items: center;
+  padding: var(--gutter);
+  background:
+    radial-gradient(90% 70% at 50% 40%, #141419 0%, var(--ink) 70%),
+    repeating-linear-gradient(115deg, transparent 0 34px, rgba(229, 30, 43, 0.06) 34px 36px);
+  transition: opacity var(--t-med) var(--ease-out);
+}
+.intro[hidden] { display: none; }
+/* Exit: the module sets inline pointer-events:none, adds .is-done, waits for
+   transitionend, then removes the node. */
+.intro.is-done { opacity: 0; }
+
+.intro__inner {
+  width: min(640px, 100%);
+  text-align: center;
+}
+/* Entrance plays when the overlay is actually shown (intro.js removes
+   [hidden] to reveal it), never while it is still hidden. */
+.intro:not([hidden]) .intro__inner {
+  animation: intro-in var(--t-slow) var(--ease-snap) both;
+}
+
+.intro__kicker {
+  font-family: var(--font-mono);
+  font-size: var(--step--1);
+  letter-spacing: 0.4em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin: 0 0 var(--sp-4);
+}
+.intro__title {
+  font-family: var(--font-display);
+  font-size: var(--step-5);
+  line-height: 0.86;
+  text-transform: uppercase;
+  transform: skewX(-8deg);
+  margin: 0 0 var(--sp-6);
+  color: var(--paper);
+  text-shadow: 6px 6px 0 #000, 10px 10px 0 var(--accent);
+}
+.intro__bar {
+  position: relative;
+  width: min(420px, 72vw);
+  height: 14px;
+  margin: 0 auto var(--sp-5);
+  background: var(--ink-3);
+  border: 2px solid var(--paper);
+  overflow: hidden;
+  clip-path: polygon(0 0, 100% 0, calc(100% - 10px) 100%, 0 100%);
+}
+/* #intro-fill is driven PER FRAME by js/intro.js via inline
+   `transform: scaleX(p)` — so NO transition/animation here (it would fight the
+   update). CSS owns the look only; --intro-progress is the reduced-motion /
+   static fallback. */
+.intro__bar-fill {
+  display: block;
+  position: absolute;
+  inset: 0;
+  transform-origin: left center;
+  transform: scaleX(var(--intro-progress, 0));
+  background: linear-gradient(90deg, var(--red-deep), var(--accent) 70%, var(--red-hot));
+}
+.intro__status {
+  font-family: var(--font-ui);
+  font-size: var(--step-1);
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--paper-dim);
+  margin: 0 0 var(--sp-5);
+}
+.intro__skip {
+  font-family: var(--font-ui);
+  letter-spacing: 0.14em;
+}
+
+@keyframes intro-in {
+  from { opacity: 0; transform: translateY(14px) scale(0.98); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* ============================================================
+   5. ALL-OUT CLOSE  (#allout — inside Case Files)
+   ============================================================ */
+.allout {
+  position: relative;
+  margin-top: var(--sp-7);
+  padding: clamp(1.75rem, 5vw, 3rem);
+  text-align: center;
+  overflow: hidden;
+  background: linear-gradient(150deg, #0b0b0f, var(--ink-2));
+  border: 4px solid var(--accent);
+  clip-path: polygon(0 0, 100% 0, 100% calc(100% - 40px), calc(100% - 40px) 100%, 0 100%);
+  box-shadow: 10px 10px 0 #000, 16px 16px 0 var(--accent);
+}
+.allout[hidden] { display: none; }
+.allout:not([hidden]),
+.allout.is-in {
+  animation: allout-in var(--t-slow) var(--ease-snap) both;
+}
+/* Diagonal speed-lines behind the copy. */
+.allout::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: repeating-linear-gradient(
+    115deg,
+    transparent 0 26px,
+    rgba(229, 30, 43, 0.12) 26px 28px
+  );
+  pointer-events: none;
+}
+.allout > * { position: relative; }
+
+.allout__kicker {
+  font-family: var(--font-mono);
+  font-size: var(--step--1);
+  letter-spacing: 0.4em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin: 0 0 var(--sp-4);
+}
+.allout__line {
+  font-family: var(--font-display);
+  font-size: var(--step-3);
+  line-height: 0.95;
+  text-transform: uppercase;
+  transform: skewX(-6deg);
+  color: var(--paper);
+  text-shadow: 4px 4px 0 #000, 7px 7px 0 var(--accent);
+  margin: 0 auto var(--sp-5);
+  max-width: 24ch;
+}
+.allout__cta {
+  font-size: var(--step-2);
+  padding: var(--sp-3) var(--sp-6);
+}
+.allout:not([hidden]) .allout__cta,
+.allout.is-in .allout__cta {
+  animation: allout-cta-pulse 2.4s var(--ease-out) 0.4s infinite;
+}
+
+@keyframes allout-in {
+  from { opacity: 0; transform: translateY(22px) skewX(4deg) scale(0.97); }
+  to   { opacity: 1; transform: translateY(0) skewX(0deg) scale(1); }
+}
+@keyframes allout-cta-pulse {
+  0%, 100% { transform: translate(0, 0); }
+  50%      { transform: translate(-2px, -2px); box-shadow: 6px 6px 0 #000, 10px 10px 0 var(--accent); }
+}
+
+/* ============================================================
+   6. STORY BEATS  (.section__story / [data-story-beat] + rail)
+   ============================================================ */
+.section__story {
+  position: relative;
+  display: block;
+  max-width: 46ch;
+  margin: 0 0 var(--sp-4);
+  padding: var(--sp-1) var(--sp-2) var(--sp-1) var(--sp-5);
+  font-family: var(--font-sub);
+  font-size: var(--step-0);
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  color: var(--paper-dim);
+  border-left: 4px solid var(--accent);
+  transform: skewX(-5deg);
+}
+/* Optional act tag (story-rail.js may set data-act from section-moods). */
+.section__story[data-act]::before {
+  content: attr(data-act);
+  display: block;
+  font-family: var(--font-mono);
+  font-size: var(--step--1);
+  letter-spacing: 0.34em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: var(--sp-1);
+}
+.section.is-active .section__story {
+  animation: story-beat-in var(--t-slow) var(--ease-snap) both;
+}
+
+/* Fixed narrative rail (optional; rendered by js/ui/story-rail.js). */
+.story-rail {
+  position: fixed;
+  left: var(--gutter);
+  bottom: var(--sp-5);
+  z-index: 20;
+  max-width: 26ch;
+  pointer-events: none;
+  font-family: var(--font-mono);
+  font-size: var(--step--1);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--paper-dim);
+}
+.story-rail__act { display: block; color: var(--accent); }
+.story-rail__beat { display: block; color: var(--muted); }
+
+@keyframes story-beat-in {
+  from { opacity: 0; transform: translateX(-16px) skewX(-5deg); }
+  to   { opacity: 1; transform: translateX(0) skewX(-5deg); }
+}
+
+/* ============================================================
+   FALLBACKS
+   ============================================================ */
+@supports not (clip-path: polygon(0 0, 1px 0, 0 1px)) {
+  .chapter-progress__track,
+  .chapter-menu__panel,
+  .chapter-wipe__panel,
+  .intro__bar,
+  .allout { clip-path: none; }
+}
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+@media (max-width: 900px) {
+  .chapter-progress { max-width: none; letter-spacing: 0.2em; }
+  .chapter-menu__link,
+  .chapter-menu__list a { font-size: var(--step-2); padding: var(--sp-3) var(--sp-2); }
+  .chapter-menu__link .chapter-menu__hud { display: none; }
+  .chapter-menu__panel { padding: var(--sp-5) var(--sp-5) var(--sp-4); }
+}
+
+@media (max-width: 620px) {
+  .chapter-progress { font-size: 0.66rem; letter-spacing: 0.14em; }
+  .chapter-progress__track { height: 10px; }
+  .chapter-menu__title { font-size: var(--step-2); }
+  .chapter-menu__link,
+  .chapter-menu__list a { font-size: var(--step-1); }
+  .chapter-wipe__label { font-size: var(--step-2); white-space: normal; max-width: 90vw; text-align: center; }
+  .intro__title { font-size: var(--step-4); }
+  /* The fixed story rail would crowd the bottom of a phone screen; the
+     in-section story beats still carry the narrative. */
+  .story-rail { display: none; }
+  .allout { box-shadow: 6px 6px 0 #000, 10px 10px 0 var(--accent); }
+  .allout__line { font-size: var(--step-2); }
+}
+
+/* ============================================================
+   REDUCED MOTION — keep every surface readable, drop the motion
+   ============================================================ */
+@media (prefers-reduced-motion: reduce) {
+  .chapter-progress__fill::after { animation: none; }
+
+  .chapter-menu.is-open .chapter-menu__scrim,
+  .chapter-menu:not([hidden]) .chapter-menu__scrim,
+  .chapter-menu.is-open .chapter-menu__panel,
+  .chapter-menu:not([hidden]) .chapter-menu__panel,
+  .chapter-menu.is-open .chapter-menu__list > li,
+  .chapter-menu:not([hidden]) .chapter-menu__list > li,
+  .intro:not([hidden]) .intro__inner,
+  .allout:not([hidden]),
+  .allout.is-in,
+  .allout:not([hidden]) .allout__cta,
+  .allout.is-in .allout__cta,
+  .section.is-active .section__story,
+  .chapter-wipe.is-running .chapter-wipe__panel,
+  .chapter-wipe.is-in .chapter-wipe__panel,
+  .chapter-wipe.is-out .chapter-wipe__panel,
+  .chapter-wipe.is-running .chapter-wipe__label,
+  .chapter-wipe.is-in .chapter-wipe__label,
+  .chapter-wipe.is-out .chapter-wipe__label {
+    animation: none;
+  }
+
+  /* Static end-states so nothing is left invisible. */
+  .chapter-menu__scrim { opacity: 1; }
+  .chapter-menu__panel,
+  .chapter-menu__list > li { opacity: 1; transform: none; }
+  .intro__inner { opacity: 1; transform: none; }
+  .allout,
+  .allout__cta { opacity: 1; transform: none; }
+  .section__story { opacity: 1; transform: skewX(-5deg); }
+  /* A single static red flash replaces the sweep. */
+  .chapter-wipe.is-running .chapter-wipe__panel,
+  .chapter-wipe.is-in .chapter-wipe__panel { transform: translateX(0) skewX(-8deg); }
+  .chapter-wipe.is-running .chapter-wipe__label,
+  .chapter-wipe.is-in .chapter-wipe__label { opacity: 1; }
+}

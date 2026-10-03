@@ -14,6 +14,7 @@
   <link rel="stylesheet" href="./css/layout.css" />
   <link rel="stylesheet" href="./css/components.css" />
   <link rel="stylesheet" href="./css/animations.css" />
+  <link rel="stylesheet" href="./css/overlays.css" />
   <link rel="stylesheet" href="./css/responsive.css" />
 
   <!-- Import map: resolves bare 'three' used by the vendored r169 addons -->
@@ -34,23 +35,30 @@
     <canvas id="gl"></canvas>
   </div>
 
-  <!-- ---------- Top bar ---------- -->
+  <!-- ---------- Top bar: brand + progress bar + menu trigger (v3) ---------- -->
   <header class="topbar">
     <a class="brand" href="#hero" aria-label="4 LIFE — home">
       <span class="dot" aria-hidden="true"></span> <span class="brand__4life">4<span class="brand__heart">♥</span>LIFE</span>
     </a>
-    <nav class="nav" aria-label="Sections">
-      <a href="#identity-file">Profile</a>
-      <a href="#hall-of-fame">Hall of Fame</a>
-      <a href="#skill-arsenal">Skills</a>
-      <a href="#mission-log">Experience</a>
-      <a href="#case-files">Projects</a>
-      <a href="#open-channel">Contact</a>
-    </nav>
-    <a class="menu-btn" id="menu-btn" href="#chapter-select" aria-label="Jump to chapter select">
+
+    <!-- Chapter progress: a read indicator, not a control. JS sets
+         --progress (0..1) and the label from portfolio:sectionchange. -->
+    <div class="chapter-progress" id="chapter-progress"
+         role="status" aria-live="polite" aria-atomic="true">
+      <span class="chapter-progress__meta" id="chapter-progress-label">CHAPTER 00 / 06</span>
+      <span class="chapter-progress__track" aria-hidden="true">
+        <span class="chapter-progress__fill" id="chapter-progress-fill"></span>
+        <span class="chapter-progress__ticks" id="chapter-progress-ticks"></span>
+      </span>
+    </div>
+
+    <button class="menu-btn" id="menu-btn" type="button"
+            aria-haspopup="dialog" aria-controls="chapter-menu" aria-expanded="false">
       <span class="menu-btn__bars" aria-hidden="true"></span>
       <span class="menu-btn__label">Menu</span>
-    </a>
+      <kbd class="menu-btn__kbd" aria-hidden="true">M</kbd>
+    </button>
+
     <noscript>
       <nav class="nav nav--fallback" aria-label="Sections">
         <a href="#identity-file">Identity File</a>
@@ -101,11 +109,12 @@
       </div>
     </section>
 
-    <!-- ============ CHAPTER SELECT (navigator as a section, not an overlay) ============ -->
+    <!-- ============ CHAPTER SELECT (in-page navigator section) ============ -->
     <section class="section chapter-select" id="chapter-select" data-name="Chapter Select"
              aria-labelledby="chapter-select-title">
       <div class="section__inner">
         <span class="section__index">NAV / CHAPTER SELECT</span>
+        <p class="section__story" data-story-beat>Pick a route. The record is open.</p>
         <h2 id="chapter-select-title" class="section__title reveal" data-swipe>Select Chapter</h2>
         <nav aria-label="Portfolio chapters">
           <ol class="chapter-select__list reveal--stagger" id="chapter-list"></ol>
@@ -118,6 +127,7 @@
       <div class="section__inner profile__grid">
         <div>
           <span class="section__index">01 / IDENTITY FILE</span>
+          <p class="section__story" data-story-beat>The person behind the model.</p>
           <h2 id="identity-file-title" class="section__title reveal" data-swipe>Profile</h2>
           <div class="panel panel--tilt reveal" id="profile-panel">
             <div id="about-copy"></div>
@@ -131,8 +141,8 @@
         <aside class="statcard reveal" aria-label="Quick facts">
           <div class="statcard__row"><b id="stat-exp-years">2+</b><span>years at Bank Mandiri</span></div>
           <div class="statcard__row"><b>16</b><span>people led in a technical team</span></div>
-          <div class="statcard__row"><b>Cum Laude</b><span>GPA 3.90 / 4.00, Telkom University</span></div>
-          <div class="statcard__row"><b>Distinction</b><span>Bangkit Academy 2022 · Top 53 project</span></div>
+          <div class="statcard__row"><b>AI &amp; Data</b><span>business + analytics + systems delivery</span></div>
+          <div class="statcard__row"><b>Open to work</b><span>Jakarta · hybrid or on-site</span></div>
         </aside>
       </div>
     </section>
@@ -141,6 +151,7 @@
     <section class="section" id="hall-of-fame" data-name="Hall of Fame" aria-labelledby="hall-of-fame-title">
       <div class="section__inner">
         <span class="section__index">02 / HALL OF FAME</span>
+        <p class="section__story" data-story-beat>Signals become evidence.</p>
         <h2 id="hall-of-fame-title" class="section__title reveal" data-swipe>Hall of Fame</h2>
         <p class="hof__deck reveal">The receipts are in.</p>
 
@@ -162,6 +173,7 @@
     <section class="section" id="skill-arsenal" data-name="Skill Arsenal" aria-labelledby="skill-arsenal-title">
       <div class="section__inner">
         <span class="section__index">03 / SKILL ARSENAL</span>
+        <p class="section__story" data-story-beat>Tools are only useful in motion.</p>
         <h2 id="skill-arsenal-title" class="section__title reveal" data-swipe>Skills</h2>
         <div id="skills-groups" class="skills reveal--stagger"></div>
       </div>
@@ -171,6 +183,7 @@
     <section class="section" id="mission-log" data-name="Mission Log" aria-labelledby="mission-log-title">
       <div class="section__inner">
         <span class="section__index">04 / MISSION LOG</span>
+        <p class="section__story" data-story-beat>Every role leaves a trace.</p>
         <h2 id="mission-log-title" class="section__title reveal" data-swipe>Experience</h2>
         <ol class="timeline reveal--stagger" id="timeline"></ol>
       </div>
@@ -180,6 +193,7 @@
     <section class="section" id="case-files" data-name="Case Files" aria-labelledby="case-files-title">
       <div class="section__inner">
         <span class="section__index">05 / CASE FILES</span>
+        <p class="section__story" data-story-beat>Evidence, not decoration.</p>
         <h2 id="case-files-title" class="section__title reveal" data-swipe>Projects</h2>
 
         <div id="spotlight-slot" class="reveal"></div>
@@ -190,6 +204,13 @@
           Only my pinned repositories are shown here. See everything on
           <a class="accent" href="https://github.com/alifadwitiyap" rel="noopener" target="_blank">GitHub</a>.
         </p>
+
+        <!-- All-Out Portfolio: reveal after the user has seen the work -->
+        <div class="allout" id="allout" hidden>
+          <p class="allout__kicker">ALL-OUT PORTFOLIO</p>
+          <p class="allout__line">CASE CLOSED.<br />BUT THE NEXT ONE STARTS WITH YOU.</p>
+          <a class="btn btn--primary allout__cta" href="#open-channel">SEND A CALLING CARD →</a>
+        </div>
       </div>
     </section>
 
@@ -197,10 +218,12 @@
     <section class="section" id="open-channel" data-name="Open Channel" aria-labelledby="open-channel-title">
       <div class="section__inner">
         <span class="section__index">06 / OPEN CHANNEL</span>
+        <p class="section__story" data-story-beat>The next signal needs a receiver.</p>
         <h2 id="open-channel-title" class="section__title reveal" data-swipe>Let's talk</h2>
-        <p class="contact__big reveal">Every problem has a solution. Let's find yours.</p>
+        <p class="contact__big reveal">EVERY PROBLEM HIDES A TREASURE.<br />
+          Let's uncover yours and turn it into a real solution.</p>
         <div class="contact__links reveal">
-          <a class="btn btn--primary" href="https://www.linkedin.com/in/alifadwitiyap/" rel="noopener" target="_blank">LinkedIn</a>
+          <a class="btn btn--primary" href="https://www.linkedin.com/in/alifadwitiyap/" rel="noopener" target="_blank">START THE HEIST →</a>
           <a class="btn" href="https://github.com/alifadwitiyap" rel="noopener" target="_blank">GitHub</a>
         </div>
       </div>
@@ -223,6 +246,42 @@
     <div class="modal__box">
       <button class="modal__close" id="modal-close" aria-label="Close">ESC ✕</button>
       <div id="modal-body"></div>
+    </div>
+  </div>
+
+  <!-- ---------- Chapter menu OVERLAY (opened by MENU / key M) ---------- -->
+  <div class="chapter-menu" id="chapter-menu" role="dialog" aria-modal="true"
+       aria-labelledby="chapter-menu-title" hidden>
+    <div class="chapter-menu__scrim" data-menu-close></div>
+    <div class="chapter-menu__panel">
+      <header class="chapter-menu__head">
+        <span class="chapter-menu__kicker">4<span class="brand__heart">♥</span>LIFE // ARCHIVE</span>
+        <h2 class="chapter-menu__title" id="chapter-menu-title">Select Chapter</h2>
+        <button class="chapter-menu__close" id="chapter-menu-close" type="button"
+                aria-label="Close menu">ESC ✕</button>
+      </header>
+      <ol class="chapter-menu__list" id="chapter-menu-list" role="list"></ol>
+      <footer class="chapter-menu__hud" aria-hidden="true">↑↓ SELECT · ENTER OPEN · M / ESC CLOSE</footer>
+    </div>
+  </div>
+
+  <!-- ---------- Cut-paper transition wipe (decorative) ---------- -->
+  <div class="chapter-wipe" id="chapter-wipe" aria-hidden="true">
+    <span class="chapter-wipe__panel"></span>
+    <span class="chapter-wipe__label" id="chapter-wipe-label"></span>
+  </div>
+
+  <!-- ---------- Opening / loading screen (enhancement, skippable) ----------
+       `hidden` by default: js/intro.js removes it to show (so a no-JS visitor
+       is never locked behind the overlay, and a returning visitor gets no
+       flash). aria-modal is added by the module while it is actually open. -->
+  <div class="intro" id="intro" role="dialog" aria-label="Opening" hidden>
+    <div class="intro__inner">
+      <p class="intro__kicker">4<span class="brand__heart">♥</span>LIFE // INITIATING</p>
+      <p class="intro__title" aria-hidden="true">MISSION ARCHIVE</p>
+      <div class="intro__bar" aria-hidden="true"><span class="intro__bar-fill" id="intro-fill"></span></div>
+      <p class="intro__status" id="intro-status">PREPARING EXPERIENCE</p>
+      <button class="intro__skip btn" id="intro-skip" type="button">SKIP INTRO</button>
     </div>
   </div>
 

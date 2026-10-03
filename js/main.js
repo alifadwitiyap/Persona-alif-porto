@@ -6,6 +6,10 @@
 import { initUI } from "./ui.js";
 import { initSections } from "./sections.js";
 import { initChapterSelect } from "./chapter-select.js";
+import { initMenu } from "./ui/menu.js";
+import { initProgress } from "./ui/progress.js";
+import { initIntro } from "./intro.js";
+import { initTransitions, initStoryRail } from "./ui/transitions.js";
 import { initPortrait, initPortraitLayout } from "./portrait.js";
 import { createPerfTier } from "./performance.js";
 
@@ -38,13 +42,15 @@ async function init() {
 
   // 5. Sections + scene wiring
   let world = null;
-  let chapters = null; // assigned just below; onChange guards with optional chaining
+  let chapters = null; // in-page chapter list
+  let menu = null; // overlay menu
   const sectionsCtl = initSections({
     onChange: (id) => {
       world?.setActive(id);
-      // The resolver is the single source of truth — mirror it into the
-      // chapter list (highlight only; scroll still owns the active section).
+      // The resolver is the single source of truth — mirror it into both the
+      // in-page chapter list and the overlay menu (highlight only).
       chapters?.setActive(id);
+      menu?.setActive(id);
       // When the mission-log section is active, sync the 3D node to the
       // timeline card nearest the viewport middle.
       if (id === "mission-log") syncTimelineNode(world);
@@ -52,11 +58,39 @@ async function init() {
   });
 
   // 5b. Chapter select (in-page navigator section). Depends only on the
-  // section controller, so it also works with WebGL disabled. Renders the
-  // anchor list from the registry and wires the "M" shortcut.
+  // section controller, so it also works with WebGL disabled.
   chapters = initChapterSelect({
     getActive: () => sectionsCtl.active,
   });
+
+  // 5c. Overlay chapter menu (opened by the MENU button / key M). Renders its
+  // own list from the registry and calls sections.goTo(); the resolver still
+  // owns the active section.
+  menu = initMenu({
+    sections: sectionsCtl,
+    getActive: () => sectionsCtl.active,
+  });
+
+  // 5d. Progress bar (topbar) + story beats + cut-paper wipe — all driven by
+  // the single `portfolio:sectionchange` event, never by raw scroll.
+  const progress = initProgress();
+  progress?.update({
+    id: sectionsCtl.active,
+    index: 0,
+    total: 7,
+    progress: 0,
+  });
+  initStoryRail();
+  const transitions = initTransitions();
+
+  // 5d-2. All-Out Portfolio close: reveal once the reader has scrolled through
+  // the case-files section (i.e. seen the work). Enhancement only — the panel
+  // is inert while hidden and never blocks anything.
+  initAllOut();
+
+  // 5e. Opening screen — an enhancement that never blocks beyond its timeout.
+  // It overlays the page and removes itself; content underneath is already live.
+  initIntro({ maxMs: 3200 });
 
   // 6. WebGL stage — decorative, guarded, disposable
   const canvas = document.getElementById("gl");
@@ -121,6 +155,39 @@ async function init() {
     console.warn("[scene] WebGL disabled:", err);
     stage?.setAttribute("data-webgl", "off");
   }
+}
+
+/**
+ * All-Out Portfolio: reveal the closing panel once the reader has scrolled
+ * through the case-files section (i.e. actually seen the work). Uses an
+ * IntersectionObserver on a sentinel — the end of the case-files grid — so it
+ * fires on real viewing, not on a fixed scroll depth. Enhancement only.
+ */
+function initAllOut() {
+  const panel = document.getElementById("allout");
+  if (!panel) return;
+  // Reveal when the reader reaches the END of the case-files section (has seen
+  // the work). Observing the section's own tail is more robust than the grid,
+  // whose top can already be above the viewport on short screens.
+  const section = document.getElementById("case-files");
+  if (!section || typeof IntersectionObserver !== "function") {
+    panel.hidden = false; // no observer support -> just show it
+    return;
+  }
+  const io = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((e) => {
+        // Trigger once the section's bottom half is in view.
+        if (e.isIntersecting && e.intersectionRatio >= 0.35) {
+          panel.hidden = false;
+          panel.classList.add("is-revealed");
+          io.disconnect();
+        }
+      });
+    },
+    { threshold: [0.35, 0.6, 0.9] }
+  );
+  io.observe(section);
 }
 
 /** Light the 3D timeline node matching the experience card at screen middle. */

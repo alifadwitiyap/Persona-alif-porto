@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en" data-section="hero">
+<head>
+  <meta charset="UTF-8" />
+  <title>intro harness</title>
+  <style>
+    /* Minimal stand-in for the CSS lane's .intro styling: enough to make the
+       overlay real (full-screen, above content) and to give is-done a fade. */
+    html, body { margin: 0; background: #070709; color: #f7f4ea; font-family: system-ui; }
+    .stage { position: fixed; inset: 0; }
+    .intro { position: fixed; inset: 0; background: #070709; z-index: 9999;
+             display: grid; place-items: center;
+             transition: opacity 300ms ease; }
+    .intro[hidden] { display: none; }
+    .intro.is-done { opacity: 0; pointer-events: none; }
+    .intro__bar { width: 60vw; height: 10px; background: #181820; }
+    .intro__bar-fill { display: block; height: 100%; background: #e51e2b; transform: scaleX(0); }
+    #hero { padding: 4rem; }
+  </style>
+</head>
+<body>
+  <div class="stage" aria-hidden="true" data-webgl="pending"></div>
+
+  <main>
+    <section id="hero"><h1>HERO — content is live under the overlay</h1>
+      <button id="hero-btn" type="button">hero button</button>
+    </section>
+  </main>
+
+  <!-- mirrors index.html's intro markup exactly -->
+  <div class="intro" id="intro" role="dialog" aria-modal="true" aria-label="Opening">
+    <div class="intro__inner">
+      <p class="intro__kicker">4LIFE // INITIATING</p>
+      <p class="intro__title" aria-hidden="true">MISSION ARCHIVE</p>
+      <div class="intro__bar" aria-hidden="true"><span class="intro__bar-fill" id="intro-fill"></span></div>
+      <p class="intro__status" id="intro-status">PREPARING EXPERIENCE</p>
+      <button class="intro__skip btn" id="intro-skip" type="button">SKIP INTRO</button>
+    </div>
+  </div>
+
+  <script type="module">
+    import { initIntro } from "../js/intro.js";
+    window.__intro = initIntro({ maxMs: 3200 });
+    // Mirror main.js: publish the real WebGL outcome on .stage[data-webgl].
+    // "on" only when a context is actually obtainable, else "off".
+    setTimeout(() => {
+      const stage = document.querySelector(".stage");
+      let ok = false;
+      try {
+        const c = document.createElement("canvas");
+        ok = !!(window.WebGLRenderingContext && (c.getContext("webgl2") || c.getContext("webgl")));
+      } catch { ok = false; }
+      stage.setAttribute("data-webgl", ok ? "on" : "off");
+    }, 300);
+  </script>
+</body>
+</html>

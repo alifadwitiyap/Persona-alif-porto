@@ -3,10 +3,11 @@
 Owns its own headless Chrome (unique debug port + profile) so it never races a
 stale CDP endpoint from another run. Asserts:
   - the anchor list is rendered from the one registry (CHAPTER_TARGETS)
-  - the old overlay (#navigator) is gone; MENU/START are anchors
+  - the old overlay (#navigator) is gone; START is an anchor and MENU is the
+    v3 overlay trigger (button with aria-controls=chapter-menu)
   - the resolver's active section mirrors into the list (scroll stays truth)
   - a native anchor click scrolls + sets the hash
-  - the "M" shortcut jumps to #chapter-select
+  - the "M" shortcut opens the overlay (v3), Esc closes it
   - no console exceptions
 
 Usage: python lab/probe_chapter_select.py [url]
@@ -175,9 +176,10 @@ def main():
           ["01", "02", "03", "04", "05", "06"])
     check("hero-not-in-list", ev(sock, "[...document.querySelectorAll('#chapter-list .chapter-select__link')].some(a=>a.getAttribute('href')==='#hero')"), False)
 
-    print("=== MENU / START ARE ANCHORS ===")
-    check("menu-btn-tag", ev(sock, "document.getElementById('menu-btn')?.tagName"), "A")
-    check("menu-btn-href", ev(sock, "document.getElementById('menu-btn')?.getAttribute('href')"), "#chapter-select")
+    print("=== MENU / START (v3: MENU is an overlay trigger, START is an anchor) ===")
+    check("menu-btn-tag", ev(sock, "document.getElementById('menu-btn')?.tagName"), "BUTTON")
+    check("menu-btn-controls", ev(sock, "document.getElementById('menu-btn')?.getAttribute('aria-controls')"), "chapter-menu")
+    check("menu-btn-collapsed", ev(sock, "document.getElementById('menu-btn')?.getAttribute('aria-expanded')"), "false")
     check("start-btn-href", ev(sock, "document.getElementById('start-btn')?.getAttribute('href')"), "#chapter-select")
 
     print("=== ACTIVE SYNC (scroll stays source of truth) ===")
@@ -198,14 +200,16 @@ def main():
     check("click-active-section", ev(sock, "document.documentElement.dataset.section"), "case-files")
     check("click-hash", ev(sock, "location.hash"), "#case-files")
 
-    print("=== 'M' SHORTCUT JUMPS TO #chapter-select ===")
+    print("=== 'M' SHORTCUT OPENS THE OVERLAY (v3) ===")
     ev(sock, "window.scrollTo(0, document.body.scrollHeight)")
     time.sleep(1.2)
+    ev(sock, "document.body.focus()")
     ev(sock, "document.dispatchEvent(new KeyboardEvent('keydown',{key:'m',bubbles:true}))")
-    time.sleep(2.5)
-    check("m-jumps-to-chapter-select",
-          ev(sock, "(()=>{const r=document.getElementById('chapter-select').getBoundingClientRect();"
-                   "return r.top < window.innerHeight*0.5 && r.bottom > 0;})()"), True)
+    time.sleep(0.5)
+    check("m-opens-overlay", ev(sock, "!document.getElementById('chapter-menu').hidden"), True)
+    ev(sock, "document.dispatchEvent(new KeyboardEvent('keydown',{key:'Escape',bubbles:true}))")
+    time.sleep(0.3)
+    check("esc-closes-overlay", ev(sock, "document.getElementById('chapter-menu').hidden"), True)
 
     print("=== CONSOLE ===")
     check("no-page-errors", ev(sock, "window.__errs || []"), [])
