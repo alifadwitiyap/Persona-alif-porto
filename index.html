@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en" data-section="hero">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>4 LIFE — Alif Adwitiya Pratama</title>
+  <meta name="description" content="Portfolio of Alif Adwitiya Pratama. Built 4 Life — from real life needs to real life solutions." />
+  <meta name="color-scheme" content="dark" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23070709'/%3E%3Ctext x='16' y='24' font-family='Arial Black,sans-serif' font-size='18' font-style='italic' font-weight='900' fill='%23e51e2b' text-anchor='middle'%3E4L%3C/text%3E%3C/svg%3E" />
+
+  <link rel="stylesheet" href="./css/fonts.css" />
+  <link rel="stylesheet" href="./css/variables.css" />
+  <link rel="stylesheet" href="./css/base.css" />
+  <link rel="stylesheet" href="./css/layout.css" />
+  <link rel="stylesheet" href="./css/components.css" />
+  <link rel="stylesheet" href="./css/animations.css" />
+  <link rel="stylesheet" href="./css/responsive.css" />
+
+  <!-- Import map: resolves bare 'three' used by the vendored r169 addons -->
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "./vendor/three.module.js",
+      "three/addons/": "./vendor/addons/"
+    }
+  }
+  </script>
+</head>
+<body>
+  <a class="skip-link" href="#hero">Skip to content</a>
+
+  <!-- Decorative WebGL stage (aria-hidden, never the source of content) -->
+  <div class="stage" aria-hidden="true" data-webgl="pending">
+    <canvas id="gl"></canvas>
+  </div>
+
+  <!-- ---------- Top bar ---------- -->
+  <header class="topbar">
+    <a class="brand" href="#hero" aria-label="4 LIFE — home">
+      <span class="dot" aria-hidden="true"></span> <span class="brand__4life">4<span class="brand__heart">♥</span>LIFE</span>
+    </a>
+    <nav class="nav" aria-label="Sections">
+      <a href="#profile">Profile</a>
+      <a href="#skills">Skills</a>
+      <a href="#experience">Experience</a>
+      <a href="#projects">Projects</a>
+      <a href="#contact">Contact</a>
+    </nav>
+    <button class="menu-btn" id="menu-btn" type="button"
+            aria-haspopup="dialog" aria-controls="navigator" aria-expanded="false">
+      <span class="menu-btn__bars" aria-hidden="true"></span>
+      <span class="menu-btn__label">Menu</span>
+    </button>
+    <noscript>
+      <nav class="nav nav--fallback" aria-label="Sections">
+        <a href="#profile">Identity File</a>
+        <a href="#skills">Skill Arsenal</a>
+        <a href="#experience">Mission Log</a>
+        <a href="#projects">Case Files</a>
+        <a href="#contact">Open Channel</a>
+      </nav>
+    </noscript>
+  </header>
+
+  <main class="shell" id="main">
+
+    <!-- ============ 01 HERO (sticky portrait) ============ -->
+    <section class="section hero" id="hero" data-name="Start" aria-labelledby="hero-title">
+      <div class="section__inner hero__grid">
+        <div class="hero__copy">
+          <p class="hero__kicker">Portfolio // Archive Access</p>
+          <h1 class="hero__name" id="hero-title">
+            Alif Adwitiya
+            <span class="line2">Pratama</span>
+          </h1>
+          <p class="hero__tagline">Built 4 Life[♥] — From real life needs to real life solutions.</p>
+          <div class="hero__actions">
+            <button class="btn btn--primary" id="start-btn" type="button" aria-haspopup="dialog" aria-controls="navigator">
+              Start
+            </button>
+            <a class="btn btn--primary" href="#projects">View Work</a>
+            <a class="btn" href="https://github.com/alifadwitiyap" rel="noopener" target="_blank">GitHub</a>
+            <a class="btn" href="https://www.linkedin.com/in/alifadwitiyap/" rel="noopener" target="_blank">LinkedIn</a>
+          </div>
+        </div>
+
+        <!-- Sticky portrait: stays on screen while scrolling, then morphs -->
+        <div class="portrait-track" id="portrait-track">
+          <div class="portrait" id="portrait" aria-label="Portrait of Alif Adwitiya Pratama">
+            <div class="portrait__frame">
+              <div class="portrait__layer" data-depth="back">
+                <img id="portrait-img" alt="Alif Adwitiya Pratama" hidden />
+                <div class="portrait__placeholder" id="portrait-placeholder">
+                  Portrait asset pending.<br />Drop <span class="mono">assets/images/profile-cutout-single.webp</span>
+                </div>
+              </div>
+            </div>
+            <div class="portrait__deco" aria-hidden="true"></div>
+            <div class="portrait__tag" id="portrait-tag">OPERATOR // ONLINE</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 02 PROFILE ============ -->
+    <section class="section" id="profile" data-name="Identity File" aria-labelledby="profile-title">
+      <div class="section__inner profile__grid">
+        <div>
+          <span class="section__index">01 / IDENTITY FILE</span>
+          <h2 id="profile-title" class="section__title reveal" data-swipe>Profile</h2>
+          <div class="panel panel--tilt reveal" id="profile-panel">
+            <div id="about-copy"></div>
+            <div class="tags" style="margin-top:var(--sp-4)">
+              <span class="tag">Bandung, ID</span>
+              <span class="tag">Data &amp; NLP</span>
+              <span class="tag">Banking</span>
+              <span class="tag">Open to work</span>
+            </div>
+          </div>
+        </div>
+        <aside class="statcard reveal" aria-label="Quick facts">
+          <div class="statcard__row"><b id="stat-exp-years">2+</b><span>years at Bank Mandiri</span></div>
+          <div class="statcard__row"><b>16</b><span>people led in a technical team</span></div>
+          <div class="statcard__row"><b>95%+</b><span>average score, Telkom internship</span></div>
+          <div class="statcard__row"><b>Distinction</b><span>Bangkit Academy 2022</span></div>
+        </aside>
+      </div>
+    </section>
+
+    <!-- ============ 03 SKILLS ============ -->
+    <section class="section" id="skills" data-name="Skill Arsenal" aria-labelledby="skills-title">
+      <div class="section__inner">
+        <span class="section__index">02 / SKILL ARSENAL</span>
+        <h2 id="skills-title" class="section__title reveal" data-swipe>Skills</h2>
+        <div id="skills-groups" class="skills reveal--stagger"></div>
+      </div>
+    </section>
+
+    <!-- ============ 04 EXPERIENCE (3D timeline) ============ -->
+    <section class="section" id="experience" data-name="Mission Log" aria-labelledby="experience-title">
+      <div class="section__inner">
+        <span class="section__index">03 / MISSION LOG</span>
+        <h2 id="experience-title" class="section__title reveal" data-swipe>Experience</h2>
+        <ol class="timeline reveal--stagger" id="timeline"></ol>
+      </div>
+    </section>
+
+    <!-- ============ 05 PROJECTS (pinned only) ============ -->
+    <section class="section" id="projects" data-name="Case Files" aria-labelledby="projects-title">
+      <div class="section__inner">
+        <span class="section__index">04 / CASE FILES</span>
+        <h2 id="projects-title" class="section__title reveal" data-swipe>Projects</h2>
+
+        <div id="spotlight-slot" class="reveal"></div>
+
+        <div class="grid-cards reveal--stagger" id="projects-grid"></div>
+
+        <p class="lead reveal" style="margin-top:var(--sp-6)">
+          Only my pinned repositories are shown here. See everything on
+          <a class="accent" href="https://github.com/alifadwitiyap" rel="noopener" target="_blank">GitHub</a>.
+        </p>
+      </div>
+    </section>
+
+    <!-- ============ 06 CONTACT ============ -->
+    <section class="section" id="contact" data-name="Open Channel" aria-labelledby="contact-title">
+      <div class="section__inner">
+        <span class="section__index">05 / OPEN CHANNEL</span>
+        <h2 id="contact-title" class="section__title reveal" data-swipe>Let's talk</h2>
+        <p class="contact__big reveal">Have a real-life problem worth solving?</p>
+        <div class="contact__links reveal">
+          <a class="btn btn--primary" href="https://www.linkedin.com/in/alifadwitiyap/" rel="noopener" target="_blank">LinkedIn</a>
+          <a class="btn" href="https://github.com/alifadwitiyap" rel="noopener" target="_blank">GitHub</a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <span class="tagline">Built 4 Life[♥] — From real life needs to real life solutions.</span>
+    <span>© <span id="year"></span> Alif Adwitiya Pratama</span>
+  </footer>
+
+  <!-- Section HUD (discrete, names not numbers) -->
+  <div class="hud" aria-hidden="true">
+    <span class="hud__bar"><span class="hud__fill" id="hud-fill"></span></span>
+    <span class="hud__name" id="hud-name">Start</span>
+  </div>
+
+  <!-- Project dossier modal -->
+  <div class="modal" id="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title" hidden>
+    <div class="modal__box">
+      <button class="modal__close" id="modal-close" aria-label="Close">ESC ✕</button>
+      <div id="modal-body"></div>
+    </div>
+  </div>
+
+  <!-- Navigator overlay: "MISSION LOG" menu (static markup, works without JS) -->
+  <div class="navigator" id="navigator" role="dialog" aria-modal="true"
+       aria-labelledby="navigator-title" hidden>
+    <div class="navigator__scrim" data-nav-close></div>
+    <div class="navigator__panel">
+      <header class="navigator__head">
+        <span class="navigator__kicker">4<span class="brand__heart">♥</span>LIFE // ARCHIVE</span>
+        <h2 class="navigator__title" id="navigator-title">Select Section</h2>
+        <button class="navigator__close" id="navigator-close" type="button" aria-label="Close menu">ESC ✕</button>
+      </header>
+
+      <ol class="navigator__list" id="navigator-list" role="list"></ol>
+
+      <footer class="navigator__hud" aria-hidden="true">
+        ↑↓ SELECT · ENTER OPEN · ESC CLOSE
+      </footer>
+    </div>
+  </div>
+
+  <script type="module" src="./js/main.js"></script>
+</body>
+</html>

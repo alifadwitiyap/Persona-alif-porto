@@ -1,0 +1,78 @@
+/* ============================================================
+   responsive.css — mobile-first adjustments
+   ============================================================ */
+
+/* No-JS fallback nav lives inside <noscript>; the regular .nav already covers
+   desktop, so only surface the fallback where .nav is hidden (mobile). */
+.nav--fallback { display: none; }
+
+@media (max-width: 900px) {
+  .hero__grid { grid-template-columns: 1fr; gap: var(--sp-6); }
+  /* keep the headline first; the portrait follows. The name must never be
+     pushed below the fold by the image. */
+  .portrait { margin: 0 auto; max-width: 340px; }
+  .spotlight { grid-template-columns: 1fr; }
+  .profile__grid { grid-template-columns: 1fr; }
+  .nav { display: none; } /* replaced by HUD + in-page anchors */
+  /* MENU is the primary navigation on mobile: it is NOT part of .nav, so it
+     stays visible here and opens the navigator overlay. */
+  .menu-btn { display: inline-flex; }
+  /* No-JS on mobile: .nav is hidden, so the noscript fallback takes over. */
+  .nav--fallback {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: var(--sp-2) var(--sp-4);
+  }
+  /* sticky morph is desktop-only; keep the portrait in normal flow */
+  .portrait-track { min-height: 0; }
+  .portrait-track.is-sticky-fallback { min-height: 0; }
+
+  /* Navigator overlay: full-bleed panel, single-column list, big touch targets */
+  .navigator { padding: 0; }
+  .navigator__panel {
+    width: 100%;
+    height: 100%;
+    max-height: none;
+    clip-path: none;
+    transform: none;
+    padding: var(--sp-6) var(--gutter) var(--sp-7);
+  }
+  .navigator__list { gap: var(--sp-2); margin: var(--sp-5) 0; }
+  .navigator__list li:nth-child(even) { transform: none; } /* drop the desktop stagger */
+  .navigator__item {
+    font-size: var(--step-2);
+    min-height: 56px;
+    padding: var(--sp-3) var(--sp-2);
+  }
+}
+
+@media (max-width: 620px) {
+  :root { --gutter: 1.15rem; }
+  .section { min-height: auto; padding: clamp(3.5rem, 10vh, 5rem) var(--gutter); }
+  .hero { min-height: 92vh; }
+  .hero__name { text-shadow: 4px 4px 0 #000, 7px 7px 0 var(--accent); }
+  .hero__tagline { border-left-width: 4px; }
+  .section__title { text-shadow: 3px 3px 0 #000, 5px 5px 0 var(--accent); }
+  .hud { display: none; }
+  .footer { flex-direction: column; align-items: flex-start; gap: var(--sp-3); }
+  .btn { width: 100%; justify-content: center; }
+  .contact__links .btn { width: auto; }
+  .timeline { padding-left: 1.6rem; }
+  .tl-item { transform: none; }
+  .statcard { transform: none; }
+  /* Compact MENU trigger so it never crowds the brand on small screens */
+  .menu-btn { padding: var(--sp-2) var(--sp-3); border-width: 2px; }
+  .menu-btn__bars { width: 18px; }
+  .navigator__item { font-size: var(--step-1); min-height: 52px; }
+}
+
+/* Wide screens: give the stage more breathing room */
+@media (min-width: 1400px) {
+  :root { --maxw: 1280px; }
+}
+
+/* Coarse pointers (touch): drop hover-only affordances */
+@media (hover: none) {
+  .card:hover, .tl-item:hover { transform: none; }
+}

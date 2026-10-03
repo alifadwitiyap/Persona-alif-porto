@@ -1,0 +1,89 @@
+/* ============================================================
+   variables.css — design tokens (Persona-5 aesthetic, original)
+   Self-hosted legal fonts: Anton, Archivo Black, Bebas Neue, Oswald.
+   ============================================================ */
+:root {
+  /* Base */
+  --ink: #070709;
+  --ink-2: #0f0f14;
+  --ink-3: #181820;
+  --ink-card: rgba(15, 15, 20, 0.88);
+  --paper: #f7f4ea;
+  --paper-dim: #cfc9bd;
+  --muted: #8a8780;
+
+  /* Accents (Persona-5 red/black/white signature) */
+  --red: #e51e2b;
+  --red-deep: #9e121b;
+  --red-hot: #ff3344;
+  --amber: #ffb020;
+  --white: #ffffff;
+
+  --accent: var(--red);
+  --accent-deep: var(--red-deep);
+
+  /* Typography — Anton heavy slanted display; Bebas Neue caps UI;
+     Oswald subheadings; Archivo Black for big hero/section titles. */
+  --font-display: "Anton", "Arial Black", Impact, sans-serif;
+  --font-hero: "Archivo Black", "Arial Black", sans-serif;
+  --font-ui: "Bebas Neue", "Impact", sans-serif;
+  --font-sub: "Oswald", sans-serif;
+  --font-body: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --font-mono: ui-monospace, "SF Mono", "Cascadia Code", "JetBrains Mono", Consolas, monospace;
+
+  /* Scale */
+  --step--1: clamp(0.78rem, 0.74rem + 0.2vw, 0.88rem);
+  --step-0: clamp(0.95rem, 0.9rem + 0.25vw, 1.05rem);
+  --step-1: clamp(1.15rem, 1.05rem + 0.5vw, 1.4rem);
+  --step-2: clamp(1.5rem, 1.3rem + 1vw, 2.1rem);
+  --step-3: clamp(2.2rem, 1.7rem + 2.8vw, 3.8rem);
+  --step-4: clamp(3.2rem, 2.1rem + 6vw, 6.8rem);
+  --step-5: clamp(4.2rem, 2.2rem + 11vw, 10.5rem);
+
+  /* Space */
+  --sp-1: 0.25rem;
+  --sp-2: 0.5rem;
+  --sp-3: 0.75rem;
+  --sp-4: 1rem;
+  --sp-5: 1.5rem;
+  --sp-6: 2rem;
+  --sp-7: 3rem;
+  --sp-8: 4.5rem;
+  --sp-9: 7rem;
+
+  /* Structure */
+  --maxw: 1180px;
+  --gutter: clamp(1rem, 4vw, 3rem);
+  --border: 2px solid var(--paper);
+  --radius: 0px;
+
+  /* Persona-5 hard-drop shadow (sharp solid offset) */
+  --shadow-hard: 7px 7px 0 #000000, 11px 11px 0 var(--accent);
+  --shadow-hard-sm: 4px 4px 0 #000000, 7px 7px 0 var(--accent);
+  --shadow-black: 6px 6px 0 #000000;
+  --shadow-red: 6px 6px 0 var(--red);
+
+  /* P5 signature angular clip-paths */
+  --clip-panel: polygon(0 0, 100% 0, 100% calc(100% - 22px), calc(100% - 22px) 100%, 0 100%);
+  --clip-panel-alt: polygon(22px 0, 100% 0, 100% 100%, 0 100%, 0 22px);
+  --clip-tag: polygon(8px 0, 100% 0, calc(100% - 8px) 100%, 0 100%);
+  --clip-btn: polygon(0 0, 100% 0, 100% 100%, 14px 100%, 0 calc(100% - 14px));
+  --clip-badge: polygon(0 0, 100% 0, calc(100% - 10px) 50%, 100% 100%, 0 100%);
+
+  /* Motion */
+  --t-fast: 140ms;
+  --t-med: 320ms;
+  --t-slow: 600ms;
+  --ease-snap: cubic-bezier(0.12, 0.95, 0.22, 1);
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Red / black / white throughout — the Persona-5 brief */
+html[data-section="profile"],
+html[data-section="skills"],
+html[data-section="experience"],
+html[data-section="projects"],
+html[data-section="contact"] {
+  --accent: var(--red);
+  --accent-deep: var(--red-deep);
+}

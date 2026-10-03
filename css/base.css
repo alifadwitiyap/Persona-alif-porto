@@ -1,0 +1,155 @@
+/* ============================================================
+   base.css — reset, typography, utilities, P5 texture helpers
+   ============================================================ */
+*,
+*::before,
+*::after { box-sizing: border-box; }
+
+html {
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+  overflow-x: clip; /* clip stray wide children without creating a scroll container */
+}
+
+body {
+  margin: 0;
+  background: var(--ink);
+  color: var(--paper);
+  font-family: var(--font-body);
+  font-size: var(--step-0);
+  line-height: 1.65;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+body.is-locked { overflow: hidden; }
+
+/* Headings: Anton, heavy, uppercase, slanted — the Persona-5 "kinetic" look.
+   The slant comes from CSS, not a licensed font. */
+h1, h2, h3, h4 {
+  font-family: var(--font-display);
+  font-weight: 400; /* Anton is single-weight */
+  line-height: 0.9;
+  margin: 0 0 var(--sp-4);
+  letter-spacing: 0.005em;
+  text-transform: uppercase;
+  transform: skewX(-7deg);
+  transform-origin: left center;
+}
+
+h1 { font-size: var(--step-4); }
+h2 { font-size: var(--step-3); }
+h3 { font-size: var(--step-2); }
+
+p { margin: 0 0 var(--sp-4); max-width: 62ch; }
+p:last-child { margin-bottom: 0; }
+
+a { color: inherit; text-decoration: none; }
+
+img { max-width: 100%; display: block; }
+
+ul, ol { margin: 0; padding: 0; list-style: none; }
+
+button {
+  font: inherit;
+  color: inherit;
+  background: none;
+  border: 0;
+  cursor: pointer;
+}
+
+:focus-visible {
+  outline: 3px solid var(--amber);
+  outline-offset: 3px;
+}
+
+::selection { background: var(--accent); color: var(--ink); }
+
+/* ---- Utilities ---- */
+.eyebrow {
+  font-family: var(--font-sub);
+  font-weight: 700;
+  font-size: var(--step--1);
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin: 0 0 var(--sp-3);
+  display: inline-block;
+}
+
+.lead { font-size: var(--step-1); color: var(--paper-dim); }
+
+.mono { font-family: var(--font-mono); }
+
+.accent { color: var(--accent); }
+
+.visually-hidden {
+  position: absolute !important;
+  width: 1px; height: 1px;
+  padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0 0 0 0);
+  white-space: nowrap; border: 0;
+}
+
+.skip-link {
+  position: absolute;
+  left: var(--sp-4);
+  top: -100px;
+  z-index: 999;
+  background: var(--accent);
+  color: var(--ink);
+  padding: var(--sp-2) var(--sp-4);
+  font-family: var(--font-mono);
+  font-weight: 700;
+  transition: top var(--t-fast);
+}
+.skip-link:focus { top: var(--sp-4); }
+
+/* ---- Persona-5 texture helpers (all original, CSS-only) ---- */
+
+/* Halftone dot field */
+.p5-halftone {
+  background-image: radial-gradient(circle at center, currentColor 1.2px, transparent 1.6px);
+  background-size: 9px 9px;
+  opacity: 0.16;
+  pointer-events: none;
+}
+
+/* Diagonal speed lines */
+.p5-speedlines {
+  background-image: repeating-linear-gradient(
+    115deg,
+    transparent 0 18px,
+    rgba(229, 30, 43, 0.14) 18px 20px,
+    transparent 20px 34px
+  );
+  pointer-events: none;
+}
+
+/* Depth-language classes: pseudo-DOF for DECORATIVE DOM only.
+   Never applied to core readable text, nav, CTAs or buttons. */
+.depth-far {
+  filter: blur(1.4px) saturate(0.72);
+  opacity: 0.52;
+  transform: scale(0.985);
+}
+.depth-mid {
+  filter: blur(0.55px) saturate(0.88);
+  opacity: 0.78;
+}
+.depth-near {
+  filter: none;
+  opacity: 1;
+  transform: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .depth-far, .depth-mid { filter: none; }
+  h1, h2, h3, h4 { transform: none; }
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}

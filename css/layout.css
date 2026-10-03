@@ -1,0 +1,212 @@
+/* ============================================================
+   layout.css — stage, shell, sections, nav, sticky portrait
+   ============================================================ */
+
+/* Fixed WebGL stage behind content */
+.stage {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(120% 90% at 50% 0%, #17171d 0%, var(--ink) 62%),
+    var(--ink);
+}
+#gl {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+/* Static fallback marks shown when WebGL is unavailable */
+.stage::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(to right, rgba(247, 244, 234, 0.05) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(247, 244, 234, 0.05) 1px, transparent 1px);
+  background-size: 64px 64px;
+  mask-image: radial-gradient(80% 70% at 50% 40%, #000 0%, transparent 78%);
+}
+.stage[data-webgl="off"]::after {
+  content: "";
+  position: absolute;
+  inset: auto -10% -20% -10%;
+  height: 60%;
+  background: repeating-linear-gradient(
+    -45deg,
+    transparent 0 22px,
+    rgba(229, 30, 43, 0.12) 22px 24px
+  );
+}
+
+/* Foreground shell */
+.shell {
+  position: relative;
+  z-index: 1;
+}
+
+/* Top nav */
+.topbar {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-4);
+  padding: var(--sp-3) var(--gutter);
+  background: linear-gradient(to bottom, rgba(7, 7, 9, 0.94), rgba(7, 7, 9, 0));
+  backdrop-filter: blur(6px);
+}
+.brand {
+  font-family: var(--font-display);
+  letter-spacing: 0.02em;
+  font-size: var(--step-2);
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  transform: skewX(-7deg);
+  text-shadow: var(--shadow-black);
+}
+.brand .dot {
+  width: 12px; height: 12px;
+  background: var(--accent);
+  transform: rotate(45deg);
+  transition: background var(--t-med);
+}
+.brand__4life { color: var(--paper); }
+.brand__heart { color: var(--accent); }
+.brand:hover { color: var(--accent); }
+
+.nav {
+  display: flex;
+  gap: var(--sp-4);
+  font-family: var(--font-ui);
+  font-size: var(--step-1);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.nav a {
+  position: relative;
+  padding: var(--sp-1) 0;
+  color: var(--paper-dim);
+  transition: color var(--t-fast);
+}
+.nav a::after {
+  content: "";
+  position: absolute;
+  left: 0; bottom: -2px;
+  width: 0; height: 3px;
+  background: var(--accent);
+  transition: width var(--t-med) var(--ease-out);
+}
+.nav a:hover, .nav a:focus-visible, .nav a[aria-current="true"] { color: var(--paper); }
+.nav a:hover::after, .nav a[aria-current="true"]::after { width: 100%; }
+
+/* Section rhythm */
+.section {
+  position: relative;
+  padding: clamp(5rem, 12vh, 9rem) var(--gutter);
+  min-height: 88vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+.section__inner {
+  width: 100%;
+  max-width: var(--maxw);
+  margin: 0 auto;
+}
+.section__index {
+  font-family: var(--font-mono);
+  font-size: var(--step--1);
+  letter-spacing: 0.3em;
+  color: var(--muted);
+  margin-bottom: var(--sp-3);
+  display: block;
+}
+/* Section titles: big Anton with a red hard shadow (P5 signature) */
+.section__title {
+  font-size: var(--step-4);
+  text-shadow: 5px 5px 0 #000, 8px 8px 0 var(--accent);
+  margin-bottom: var(--sp-6);
+}
+
+/* Footer */
+.footer {
+  position: relative;
+  z-index: 1;
+  padding: var(--sp-7) var(--gutter) var(--sp-8);
+  border-top: 2px solid var(--ink-3);
+  max-width: var(--maxw);
+  margin: 0 auto;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-4);
+  justify-content: space-between;
+  align-items: center;
+  font-family: var(--font-mono);
+  font-size: var(--step--1);
+  color: var(--muted);
+}
+.footer .tagline { color: var(--paper-dim); }
+
+/* Section counter HUD (shows active section name, not a number) */
+.hud {
+  position: fixed;
+  right: var(--gutter);
+  bottom: var(--sp-5);
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  font-family: var(--font-ui);
+  font-size: var(--step-1);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--paper-dim);
+  pointer-events: none;
+  padding: var(--sp-1) var(--sp-2);
+  background: rgba(7, 7, 9, 0.6);
+  backdrop-filter: blur(3px);
+}
+.hud .hud__bar {
+  width: 92px; height: 5px;
+  background: var(--ink-3);
+  position: relative;
+  overflow: hidden;
+}
+.hud .hud__fill {
+  position: absolute;
+  inset: 0 100% 0 0;
+  background: var(--accent);
+  transition: right 120ms linear, background var(--t-med);
+}
+.hud .hud__name { min-width: 8ch; text-align: right; color: var(--paper); }
+
+/* ---- Sticky portrait track ----
+   The portrait stays on screen while the hero scrolls past, then morphs
+   (see js/main.js + .portrait[data-morph]). Disabled on small screens and
+   under prefers-reduced-motion. */
+.portrait-track { position: relative; }
+@media (min-width: 901px) and (prefers-reduced-motion: no-preference) {
+  .portrait-track:not(.is-sticky-fallback) {
+    /* taller than the portrait so it has room to stay pinned */
+    min-height: 150vh;
+  }
+  .portrait-track:not(.is-sticky-fallback) .portrait {
+    position: sticky;
+    top: 14vh;
+    will-change: transform, opacity;
+  }
+  /* Fallback wins (js/portrait.js): short viewport or no sticky support —
+     drop the pin and return the portrait to normal flow. */
+  .portrait-track.is-sticky-fallback .portrait {
+    position: relative;
+    top: auto;
+  }
+}

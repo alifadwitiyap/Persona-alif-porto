@@ -1,0 +1,16 @@
+# Ignore Comet plan-run audit artifacts (local only, not shared)
+.comet-plan/
+
+# OS / editor
+Thumbs.db
+.DS_Store
+.vscode/
+.idea/
+
+# Local scratch
+*.log
+*.bak
+lab/shots/
+.planning/
+__pycache__/
+*.pyc
