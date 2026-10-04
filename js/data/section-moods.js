@@ -16,10 +16,8 @@
  *     story: {                           // narrative microcopy (v3)
  *       act: string,                     // one word: SIGNAL / IDENTIFY / PROVE ...
  *       beat: string,                    // one short line shown as a kicker
- *       transitionIn: string,            // label flashed by the cut-paper wipe in
- *       transitionOut: string,           // label flashed by the wipe out
  *     },
- *     menu: {                            // chapter-select + HUD label
+ *     menu: {                            // chapter menu overlay + HUD label
  *       index: string,                   // 2-digit display, e.g. '01'
  *       label: string,                   // menu label (UPPERCASE, English)
  *       hud: string,                     // short name shown in the HUD
@@ -66,9 +64,6 @@ const clamp = (value, lo, hi) => Math.min(hi, Math.max(lo, value));
  * Documented table. One entry per section id, in document order:
  * hero, identity-file, hall-of-fame, skill-arsenal, mission-log, case-files,
  * open-channel.
- *
- * `chapter-select` is intentionally NOT here: it is a navigation surface, not
- * a content destination (no 3D mood of its own).
  */
 export const sectionMoods = {
   hero: {
@@ -78,8 +73,6 @@ export const sectionMoods = {
     story: {
       act: "SIGNAL",
       beat: "A signal enters the system.",
-      transitionIn: "INITIALISING",
-      transitionOut: "SIGNAL ACQUIRED",
     },
     menu: { index: "00", label: "START", hud: "Start" },
     scene: { focus: 0.9, camX: 0.0, camY: 0.2, layout: "archiveCore", motion: "orbit" },
@@ -97,8 +90,6 @@ export const sectionMoods = {
     story: {
       act: "IDENTIFY",
       beat: "The person behind the model.",
-      transitionIn: "OPEN THE FILE",
-      transitionOut: "SUBJECT CONFIRMED",
     },
     menu: { index: "01", label: "IDENTITY FILE", hud: "Identity File" },
     scene: { focus: 1.5, camX: -0.7, camY: 0.1, layout: "portraitFrame", motion: "orbit" },
@@ -114,8 +105,6 @@ export const sectionMoods = {
     story: {
       act: "PROVE",
       beat: "Signals become evidence.",
-      transitionIn: "OPEN THE ARCHIVE",
-      transitionOut: "CASE STATUS: RESOLVED",
     },
     menu: { index: "02", label: "HALL OF FAME", hud: "Hall of Fame" },
     scene: { focus: 1.75, camX: 0.5, camY: 0.05, layout: "shardField", motion: "rise" },
@@ -131,8 +120,6 @@ export const sectionMoods = {
     story: {
       act: "ARM",
       beat: "Tools are only useful in motion.",
-      transitionIn: "DEPLOY LOADOUT",
-      transitionOut: "ARSENAL ONLINE",
     },
     menu: { index: "03", label: "SKILL ARSENAL", hud: "Skill Arsenal" },
     scene: { focus: 2.0, camX: 0.6, camY: -0.1, layout: "constellation", motion: "pulse" },
@@ -148,8 +135,6 @@ export const sectionMoods = {
     story: {
       act: "MOVE",
       beat: "Every role leaves a trace.",
-      transitionIn: "ROLL FIELD LOG",
-      transitionOut: "TRACE RECORDED",
     },
     menu: { index: "04", label: "MISSION LOG", hud: "Mission Log" },
     scene: { focus: 2.6, camX: -0.5, camY: 0.15, layout: "timelineRail", motion: "rise" },
@@ -165,8 +150,6 @@ export const sectionMoods = {
     story: {
       act: "DEPLOY",
       beat: "Evidence, not decoration.",
-      transitionIn: "OPEN THE ARCHIVE",
-      transitionOut: "CASE STATUS: RESOLVED",
     },
     menu: { index: "05", label: "CASE FILES", hud: "Case Files" },
     scene: { focus: 3.1, camX: 0.5, camY: 0.0, layout: "shardField", motion: "parallax" },
@@ -182,8 +165,6 @@ export const sectionMoods = {
     story: {
       act: "CONTINUE",
       beat: "The next signal needs a receiver.",
-      transitionIn: "OPEN THE LINE",
-      transitionOut: "CHANNEL OPEN",
     },
     menu: { index: "06", label: "OPEN CHANNEL", hud: "Open Channel" },
     scene: { focus: 3.6, camX: 0.0, camY: 0.2, layout: "archiveCore", motion: "settle" },
@@ -195,11 +176,11 @@ export const sectionMoods = {
 };
 
 /**
- * The 6 content destinations shown in the chapter select (everything except
- * the hero). Derived from the registry — never a second hand-kept list.
+ * The 6 content destinations shown in the chapter menu overlay (everything
+ * except the hero). Derived from the registry — never a second hand-kept list.
  *
- * Each entry is the mood plus its `id`, so consumers (chapter-select.js) can
- * build `href="#<id>"` anchors without a second lookup. The registry keys stay
+ * Each entry is the mood plus its `id`, so consumers (js/ui/menu.js) can
+ * build `data-goto="<id>"` items without a second lookup. The registry keys stay
  * the single source of truth for ids and order.
  */
 export const CHAPTER_TARGETS = Object.entries(sectionMoods)

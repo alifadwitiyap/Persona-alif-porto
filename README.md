@@ -14,7 +14,10 @@ Tagline: `Built 4 Life[♥] — From real life needs to real life solutions.`
 - v2 change plan (Persona-5 / 4 LIFE / animations): [`docs/plans/2026-10-03-perubahan-persona5-4life-animasi.md`](docs/plans/2026-10-03-perubahan-persona5-4life-animasi.md)
 - Navigator overlay plan ("MISSION LOG" menu): [`docs/plans/2026-10-03-navigator-mission-log-implementasi.md`](docs/plans/2026-10-03-navigator-mission-log-implementasi.md)
 - Verification harness: `lab/verify.py` (headless Chrome, self-cleaning)
-- Navigator probe: `lab/probe_navigator.py` (open/close, focus trap, keyboard, `goTo`, resolver mirror)
+- Content probe: `lab/verify_content.py` (profile / hall of fame / projects / CTA copy)
+- Menu-overlay probe: `lab/verify_menu_overlay.py` (open/close, focus trap, keyboard, `goTo`, resolver mirror)
+- Overlay-fit probe: `lab/probe_menu_fit.py` (panel fits every viewport, no page scroll)
+- Story-rail + transition-removal probe: `lab/probe_transitions.py`
 - Portrait pipeline: `lab/make_portrait.py` (rembg matting → 4/5 framed cutout)
 
 ## Stack
@@ -35,30 +38,36 @@ python -m http.server 8077
 
 ## Sections
 
-`hero` → `profile` → `skills` → `experience` → `projects` → `contact`
+`hero` → `identity-file` → `hall-of-fame` → `skill-arsenal` → `mission-log` → `case-files` → `open-channel`
 
 ## What's inside
 
 | File | Role |
 |---|---|
-| `index.html` | Semantic shell, import map, 6 sections |
+| `index.html` | Semantic shell, import map, 7 sections |
 | `css/fonts.css` | Self-hosted @font-face (Anton, Archivo Black, Bebas Neue, Oswald) |
 | `css/variables.css` | Design tokens (red/black/white, angular shapes, P5 shadows) |
 | `css/base.css` | Reset, typography, P5 texture helpers, depth classes |
 | `css/layout.css` | Stage, top bar, section rhythm, HUD, sticky portrait track |
-| `css/components.css` | Hero, portrait morph, timeline, statcard, cards, modal |
+| `css/components.css` | Hero, portrait morph, timeline, identity card, cards, modal |
 | `css/animations.css` | Reveal, P5 swipe titles, speed-lines |
 | `css/responsive.css` | Breakpoints |
 | `js/main.js` | Entry: content → portrait morph → WebGL |
-| `js/ui.js` | Renders profile, skills, experience, projects |
+| `js/ui.js` | Renders profile, skills, experience, hall of fame, projects |
 | `js/sections.js` | Active section, reveal, timeline node lighting, `goTo(id)` |
-| `js/navigator.js` | "MISSION LOG" overlay: open/close, focus trap, keyboard, `goTo` + resolver mirror |
+| `js/ui/menu.js` | Chapter-menu OVERLAY: open/close, focus trap, keyboard, `goTo` + resolver mirror |
+| `js/ui/progress.js` | Topbar chapter-progress read-indicator (driven by `portfolio:sectionchange`) |
+| `js/ui/story-rail.js` | Fixed story rail: mirrors the active chapter's act + beat microcopy |
+| `js/intro.js` | Opening / loading screen (skippable, self-removing) |
+| `js/camera-shift.js` | Pure math for the per-section 3D camera "space-shift" impulse |
 | `js/scene.js` | Three.js: core, shards, orbits, constellation, timeline rail, warp, BokehPass |
 | `js/performance.js` | Adaptive tier from measured frame time |
 | `js/portrait.js` | Manifest-driven portrait (single cutout + optional split) |
+| `js/data/section-moods.js` | SINGLE data contract: section order, accent, progress, story, menu, scene |
 | `js/data/profile.js` | Identity + copy (from LinkedIn) |
 | `js/data/experience.js` | Work history (single source of truth) |
-| `js/data/projects.js` | Pinned repos only (NDETCStemmer, unword) |
+| `js/data/hall-of-fame.js` | Academic record, awards, publications |
+| `js/data/projects.js` | Pinned repos only (NDETCStemmer, unword, WA-Bulk) |
 
 ## Features
 
@@ -71,10 +80,12 @@ python -m http.server 8077
 - **3D experience timeline** — real jobs from LinkedIn; each card lights a 3D node.
 - **Depth of field** — `BokehPass` blurs the WebGL layer; CSS `.depth-*` classes
   give the DOM a matching depth language (core text always stays sharp).
-- **New 3D animations** — timeline nodes, skill constellation, section warp burst,
-  portrait orbit ring; lateral parallax only, no Z-dolly.
-- **Navigator overlay ("MISSION LOG")** — full CSS/JS menu opened with the
-  topbar **MENU** button, the hero **START** button, or the **M** key. `Esc`
+- **New 3D animations** — timeline nodes, skill constellation, portrait orbit ring,
+  and a per-section camera "space-shift" (the camera banks into the travel
+  direction and the whole group counter-drifts) — a smooth move through space
+  with no overlay wipe. Lateral parallax only, no Z-dolly.
+- **Chapter-menu overlay ("MISSION LOG")** — full CSS/JS menu opened with the
+  topbar **MENU** button or the **M** key. `Esc`
   closes; `Tab` is trapped; `↑↓` move between items; `Enter` opens a section.
   Scroll stays the source of truth: the panel only mirrors the active section
   (from `sections.js`), and picking an item calls `sections.goTo(id)` →
@@ -89,8 +100,8 @@ python -m http.server 8077
 ## Known follow-ups
 
 1. Site language: English / Indonesian / bilingual.
-2. Public email (currently omitted on purpose).
-3. Optional head/torso split portrait.
+2. Optional head/torso split portrait.
+3. GitHub Actions CI to run the `lab/` probes on every push.
 
 ## Note on the photo
 

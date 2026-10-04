@@ -1,15 +1,17 @@
 /* ============================================================
    overlays.css — v3 chrome: progress bar, chapter menu overlay,
-   cut-paper wipe, opening screen, All-Out close, story beats.
+   opening screen, story beats.
 
    Layering (z-index), highest wins:
      0   .stage            WebGL stage (decorative)
      1   .shell / .footer  page content
      20  .topbar / .hud    fixed chrome
-     35  .chapter-wipe     cut-paper transition (under the modal)
      40  .modal            project dossier (existing)
      60  .chapter-menu     overlay menu (above the dossier)
      70  .intro            opening screen (top of everything)
+
+   Section-to-section MOTION is the 3D camera shift in js/scene.js (shaped by
+   js/camera-shift.js) — there is no overlay transition layer.
 
    State contract (driven by JS, never by CSS):
      - #chapter-progress  js/ui/progress.js sets --progress + scaleX on the
@@ -17,13 +19,11 @@
      - #chapter-menu      shown when the [hidden] attribute is removed OR the
                           element gets `.is-open` (both paths supported);
                           js/ui/menu.js toggles `hidden`.
-     - #chapter-wipe      `.is-running` sweeps once per section change; also
-                          accepts `.is-in` / `.is-out` for a two-phase driver.
+     - .story-rail        the narrative microcopy rail, filled by
+                          js/ui/story-rail.js.
      - #intro             js/intro.js removes the markup's `hidden` to show,
                           adds `.is-done` to fade, then removes the node — so a
                           no-JS visitor never sees the overlay at all.
-     - #allout            shown when [hidden] is removed (JS reveals it after
-                          the work has been seen) or with `.is-in`.
    All motion collapses under prefers-reduced-motion and no state leaves
    content stuck invisible.
    ============================================================ */
@@ -118,6 +118,8 @@ html:not([data-section="hero"]) .chapter-progress__meta { color: var(--paper-dim
   z-index: 60;
   display: none;
   place-items: center;
+  /* Gutter on every side keeps the panel clear of the viewport edges; the
+     panel then only has to fit the space this leaves. */
   padding: var(--gutter);
 }
 .chapter-menu[hidden] { display: none; }
@@ -142,13 +144,23 @@ html:not([data-section="hero"]) .chapter-progress__meta { color: var(--paper-dim
 .chapter-menu__panel {
   position: relative;
   width: min(760px, 100%);
-  max-height: min(86vh, 780px);
-  overflow: auto;
+  /* Fit the viewport: the overlay's own padding is the margin, so the panel
+     is capped to the space that padding leaves and never forces a page
+     scroll. If the rows ever exceed it, the list scrolls internally. */
+  max-height: 100%;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
   padding: var(--sp-6) var(--sp-6) var(--sp-5);
   background: linear-gradient(160deg, var(--ink-2), var(--ink));
   border: 3px solid var(--accent);
   clip-path: polygon(0 0, 100% 0, 100% calc(100% - 34px), calc(100% - 34px) 100%, 0 100%);
   box-shadow: 10px 10px 0 #000, 16px 16px 0 var(--accent);
+}
+/* Use the dynamic viewport unit where supported so mobile browser chrome
+   cannot push the panel past the visible area. */
+@supports (height: 100dvh) {
+  .chapter-menu__panel { max-height: 100dvh; }
 }
 .chapter-menu.is-open .chapter-menu__panel,
 .chapter-menu:not([hidden]) .chapter-menu__panel {
@@ -157,6 +169,7 @@ html:not([data-section="hero"]) .chapter-progress__meta { color: var(--paper-dim
 
 .chapter-menu__head {
   position: relative;
+  flex: 0 0 auto;        /* pinned: never scrolls, never shrinks */
   margin-bottom: var(--sp-5);
   padding-bottom: var(--sp-4);
   border-bottom: 3px solid var(--ink-3);
@@ -198,10 +211,19 @@ html:not([data-section="hero"]) .chapter-progress__meta { color: var(--paper-dim
 
 /* ---- Item list: rendered from the one registry by js/ui/menu.js ----
    Rows are anchors that call sections.goTo(); the resolver still owns the
-   active state, mirrored here through [data-active]/[aria-current]. */
+   active state, mirrored here through [data-active]/[aria-current].
+   The list is the panel's only scroll region: the head and the footer stay
+   pinned so the title, close button and key legend never scroll away. */
 .chapter-menu__list {
   display: grid;
   gap: var(--sp-2);
+  min-height: 0;         /* allow the flex child to shrink and scroll */
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  /* Small negative inline margin so the row hover/active fills reach the
+     panel edge without clipping under the border. */
+  margin-inline: calc(-1 * var(--sp-2));
+  padding-inline: var(--sp-2);
 }
 .chapter-menu__list > li { min-width: 0; }
 
@@ -294,6 +316,7 @@ html:not([data-section="hero"]) .chapter-progress__meta { color: var(--paper-dim
 /* Panel footer legend (a direct child of the panel; the per-item HUD tags are
    scoped separately above so the two never share declarations). */
 .chapter-menu__panel > .chapter-menu__hud {
+  flex: 0 0 auto;        /* pinned footer legend */
   margin-top: var(--sp-5);
   padding-top: var(--sp-3);
   border-top: 2px solid var(--ink-3);
@@ -315,90 +338,6 @@ html:not([data-section="hero"]) .chapter-progress__meta { color: var(--paper-dim
 @keyframes menu-item-in {
   from { opacity: 0; transform: translateX(-18px); }
   to   { opacity: 1; transform: translateX(0); }
-}
-
-/* ============================================================
-   3. CUT-PAPER TRANSITION WIPE  (#chapter-wipe)
-   Sweeps once on section change. Decorative, never blocks input.
-   ============================================================ */
-.chapter-wipe {
-  position: fixed;
-  inset: 0;
-  z-index: 35;
-  pointer-events: none; /* must never trap scroll or clicks */
-  overflow: hidden;
-  visibility: hidden;
-}
-.chapter-wipe.is-running,
-.chapter-wipe.is-in,
-.chapter-wipe.is-out { visibility: visible; }
-
-/* Abstract torn-paper shard: red face with a jagged leading edge.
-   js/ui/transitions.js publishes --transition-accent (active chapter accent)
-   and --transition-direction (-1 upward / 1 downward); both are honoured with
-   the brand red / downward sweep as the fallback. */
-.chapter-wipe__panel {
-  position: absolute;
-  top: -25%;
-  bottom: -25%;
-  left: -15%;
-  right: -15%;
-  background: linear-gradient(
-    100deg,
-    var(--red-deep),
-    var(--transition-accent, var(--accent)) 42%,
-    var(--transition-accent, var(--accent)) 50%,
-    #0b0b0f 51%,
-    #0b0b0f 100%
-  );
-  clip-path: polygon(
-    0 0, 100% 0, 100% 16%, 95% 24%, 100% 34%, 96% 46%, 100% 56%,
-    94% 66%, 100% 76%, 97% 86%, 100% 100%, 0 100%,
-    5% 88%, 0 74%, 4% 60%, 0 46%, 5% 32%, 0 18%
-  );
-  transform: translateX(calc(-135% * var(--transition-direction, 1))) skewX(-8deg);
-}
-.chapter-wipe.is-running .chapter-wipe__panel {
-  animation: wipe-pass var(--t-slow) var(--ease-snap) both;
-}
-.chapter-wipe.is-in .chapter-wipe__panel { animation: wipe-in var(--t-med) var(--ease-snap) both; }
-.chapter-wipe.is-out .chapter-wipe__panel { animation: wipe-out var(--t-med) var(--ease-snap) both; }
-
-.chapter-wipe__label {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%) skewX(-8deg);
-  font-family: var(--font-display);
-  font-size: var(--step-3);
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--paper);
-  text-shadow: 4px 4px 0 #000, 7px 7px 0 var(--accent);
-  white-space: nowrap;
-  opacity: 0;
-}
-.chapter-wipe.is-running .chapter-wipe__label { animation: wipe-label var(--t-slow) var(--ease-snap) both; }
-.chapter-wipe.is-in .chapter-wipe__label { animation: wipe-label var(--t-med) var(--ease-snap) both; }
-.chapter-wipe.is-out .chapter-wipe__label { animation: wipe-label var(--t-med) var(--ease-snap) both; }
-
-@keyframes wipe-pass {
-  0%   { transform: translateX(calc(-135% * var(--transition-direction, 1))) skewX(-8deg); }
-  55%  { transform: translateX(0) skewX(-8deg); }
-  100% { transform: translateX(calc(135% * var(--transition-direction, 1))) skewX(-8deg); }
-}
-@keyframes wipe-in {
-  from { transform: translateX(calc(-135% * var(--transition-direction, 1))) skewX(-8deg); }
-  to   { transform: translateX(0) skewX(-8deg); }
-}
-@keyframes wipe-out {
-  from { transform: translateX(0) skewX(-8deg); }
-  to   { transform: translateX(calc(135% * var(--transition-direction, 1))) skewX(-8deg); }
-}
-@keyframes wipe-label {
-  0%   { opacity: 0; transform: translate(-50%, -50%) skewX(-8deg) scale(0.9); }
-  45%  { opacity: 1; transform: translate(-50%, -50%) skewX(-8deg) scale(1); }
-  100% { opacity: 0; transform: translate(-50%, -50%) skewX(-8deg) scale(1.04); }
 }
 
 /* ============================================================
@@ -493,76 +432,6 @@ html:not([data-section="hero"]) .chapter-progress__meta { color: var(--paper-dim
 }
 
 /* ============================================================
-   5. ALL-OUT CLOSE  (#allout — inside Case Files)
-   ============================================================ */
-.allout {
-  position: relative;
-  margin-top: var(--sp-7);
-  padding: clamp(1.75rem, 5vw, 3rem);
-  text-align: center;
-  overflow: hidden;
-  background: linear-gradient(150deg, #0b0b0f, var(--ink-2));
-  border: 4px solid var(--accent);
-  clip-path: polygon(0 0, 100% 0, 100% calc(100% - 40px), calc(100% - 40px) 100%, 0 100%);
-  box-shadow: 10px 10px 0 #000, 16px 16px 0 var(--accent);
-}
-.allout[hidden] { display: none; }
-.allout:not([hidden]),
-.allout.is-in {
-  animation: allout-in var(--t-slow) var(--ease-snap) both;
-}
-/* Diagonal speed-lines behind the copy. */
-.allout::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background-image: repeating-linear-gradient(
-    115deg,
-    transparent 0 26px,
-    rgba(229, 30, 43, 0.12) 26px 28px
-  );
-  pointer-events: none;
-}
-.allout > * { position: relative; }
-
-.allout__kicker {
-  font-family: var(--font-mono);
-  font-size: var(--step--1);
-  letter-spacing: 0.4em;
-  text-transform: uppercase;
-  color: var(--accent);
-  margin: 0 0 var(--sp-4);
-}
-.allout__line {
-  font-family: var(--font-display);
-  font-size: var(--step-3);
-  line-height: 0.95;
-  text-transform: uppercase;
-  transform: skewX(-6deg);
-  color: var(--paper);
-  text-shadow: 4px 4px 0 #000, 7px 7px 0 var(--accent);
-  margin: 0 auto var(--sp-5);
-  max-width: 24ch;
-}
-.allout__cta {
-  font-size: var(--step-2);
-  padding: var(--sp-3) var(--sp-6);
-}
-.allout:not([hidden]) .allout__cta,
-.allout.is-in .allout__cta {
-  animation: allout-cta-pulse 2.4s var(--ease-out) 0.4s infinite;
-}
-
-@keyframes allout-in {
-  from { opacity: 0; transform: translateY(22px) skewX(4deg) scale(0.97); }
-  to   { opacity: 1; transform: translateY(0) skewX(0deg) scale(1); }
-}
-@keyframes allout-cta-pulse {
-  0%, 100% { transform: translate(0, 0); }
-  50%      { transform: translate(-2px, -2px); box-shadow: 6px 6px 0 #000, 10px 10px 0 var(--accent); }
-}
-
-/* ============================================================
    6. STORY BEATS  (.section__story / [data-story-beat] + rail)
    ============================================================ */
 .section__story {
@@ -622,9 +491,7 @@ html:not([data-section="hero"]) .chapter-progress__meta { color: var(--paper-dim
 @supports not (clip-path: polygon(0 0, 1px 0, 0 1px)) {
   .chapter-progress__track,
   .chapter-menu__panel,
-  .chapter-wipe__panel,
-  .intro__bar,
-  .allout { clip-path: none; }
+  .intro__bar { clip-path: none; }
 }
 
 /* ============================================================
@@ -642,15 +509,16 @@ html:not([data-section="hero"]) .chapter-progress__meta { color: var(--paper-dim
   .chapter-progress { font-size: 0.66rem; letter-spacing: 0.14em; }
   .chapter-progress__track { height: 10px; }
   .chapter-menu__title { font-size: var(--step-2); }
+  /* Tighten the overlay on phones so the panel keeps clear margins and the
+     list still has room to scroll between the pinned head and footer. */
+  .chapter-menu__panel { padding: var(--sp-5) var(--sp-4) var(--sp-4); }
+  .chapter-menu__head { margin-bottom: var(--sp-4); }
   .chapter-menu__link,
   .chapter-menu__list a { font-size: var(--step-1); }
-  .chapter-wipe__label { font-size: var(--step-2); white-space: normal; max-width: 90vw; text-align: center; }
   .intro__title { font-size: var(--step-4); }
   /* The fixed story rail would crowd the bottom of a phone screen; the
      in-section story beats still carry the narrative. */
   .story-rail { display: none; }
-  .allout { box-shadow: 6px 6px 0 #000, 10px 10px 0 var(--accent); }
-  .allout__line { font-size: var(--step-2); }
 }
 
 /* ============================================================
@@ -666,17 +534,7 @@ html:not([data-section="hero"]) .chapter-progress__meta { color: var(--paper-dim
   .chapter-menu.is-open .chapter-menu__list > li,
   .chapter-menu:not([hidden]) .chapter-menu__list > li,
   .intro:not([hidden]) .intro__inner,
-  .allout:not([hidden]),
-  .allout.is-in,
-  .allout:not([hidden]) .allout__cta,
-  .allout.is-in .allout__cta,
-  .section.is-active .section__story,
-  .chapter-wipe.is-running .chapter-wipe__panel,
-  .chapter-wipe.is-in .chapter-wipe__panel,
-  .chapter-wipe.is-out .chapter-wipe__panel,
-  .chapter-wipe.is-running .chapter-wipe__label,
-  .chapter-wipe.is-in .chapter-wipe__label,
-  .chapter-wipe.is-out .chapter-wipe__label {
+  .section.is-active .section__story {
     animation: none;
   }
 
@@ -685,12 +543,5 @@ html:not([data-section="hero"]) .chapter-progress__meta { color: var(--paper-dim
   .chapter-menu__panel,
   .chapter-menu__list > li { opacity: 1; transform: none; }
   .intro__inner { opacity: 1; transform: none; }
-  .allout,
-  .allout__cta { opacity: 1; transform: none; }
   .section__story { opacity: 1; transform: skewX(-5deg); }
-  /* A single static red flash replaces the sweep. */
-  .chapter-wipe.is-running .chapter-wipe__panel,
-  .chapter-wipe.is-in .chapter-wipe__panel { transform: translateX(0) skewX(-8deg); }
-  .chapter-wipe.is-running .chapter-wipe__label,
-  .chapter-wipe.is-in .chapter-wipe__label { opacity: 1; }
 }

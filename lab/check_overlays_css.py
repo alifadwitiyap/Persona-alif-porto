@@ -62,15 +62,16 @@ def main():
     check("menu scrim present",
           ev(sock, "!!document.querySelector('.chapter-menu__scrim')"), True)
 
-    # 3. cut-paper wipe
-    ev(sock, "document.getElementById('chapter-wipe').classList.add('is-running')")
-    time.sleep(0.1)
-    check("wipe visible while running",
-          ev(sock, "getComputedStyle(document.getElementById('chapter-wipe')).visibility") == "visible",
-          ev(sock, "getComputedStyle(document.getElementById('chapter-wipe')).visibility"))
-    check("wipe is pointer-events:none",
-          ev(sock, "getComputedStyle(document.getElementById('chapter-wipe')).pointerEvents") == "none",
-          ev(sock, "getComputedStyle(document.getElementById('chapter-wipe')).pointerEvents"))
+    # 3. transition overlay REMOVED — the served stylesheet must carry no
+    #    .space-shift rule and no space-shift-pass keyframe. Read the file text
+    #    (the stylesheet is same-origin, so fetch resolves it).
+    css_text = ev(sock, "(async()=>{try{return await (await fetch('css/overlays.css')).text()}catch(e){return ''}})()") or ""
+    check("overlays.css has NO '.space-shift' rule",
+          ".space-shift" not in css_text,
+          ".space-shift" if ".space-shift" in css_text else "")
+    check("overlays.css has NO 'space-shift-pass' keyframe",
+          "space-shift-pass" not in css_text,
+          "space-shift-pass" if "space-shift-pass" in css_text else "")
 
     # 4. intro screen. intro.js removes the node once seen this session, so
     # re-inject the markup if it is already gone before probing the CSS.
@@ -91,17 +92,7 @@ def main():
           ev(sock, "getComputedStyle(document.getElementById('intro-fill')).transitionProperty"))
     ev(sock, "document.getElementById('intro').setAttribute('hidden','')")
 
-    # 5. all-out close (force show)
-    ev(sock, "document.getElementById('allout').removeAttribute('hidden')")
-    time.sleep(0.2)
-    check("allout visible when [hidden] removed",
-          ev(sock, "getComputedStyle(document.getElementById('allout')).display") != "none",
-          ev(sock, "getComputedStyle(document.getElementById('allout')).display"))
-    check("allout has accent border",
-          ev(sock, "getComputedStyle(document.getElementById('allout')).borderTopWidth") not in ("0px", ""),
-          ev(sock, "getComputedStyle(document.getElementById('allout')).borderTopWidth"))
-
-    # 6. story beats
+    # 5. story beats
     check("story beat styled with a left border",
           ev(sock, "getComputedStyle(document.querySelector('.section__story')).borderLeftWidth") not in ("0px", ""),
           ev(sock, "getComputedStyle(document.querySelector('.section__story')).borderLeftWidth"))

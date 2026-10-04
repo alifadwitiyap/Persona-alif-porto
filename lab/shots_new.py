@@ -1,4 +1,4 @@
-"""Capture the new sections: chapter-select + hall-of-fame (+ hero)."""
+"""Capture the new sections: hall-of-fame (+ hero)."""
 import sys, time, importlib.util, os
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -24,7 +24,7 @@ v.recv_until(sock, v.send(sock, "Page.navigate", {"url": URL + "?s=" + str(int(t
 time.sleep(3.5); v.drain(sock, 0.8)
 v.shot(sock, "new-hero.png")
 
-for sec in ("chapter-select", "hall-of-fame", "identity-file", "case-files"):
+for sec in ("hall-of-fame", "identity-file", "case-files"):
     ev(f"document.getElementById('{sec}').scrollIntoView({{behavior:'auto',block:'start'}})")
     time.sleep(1.4)
     v.shot(sock, f"new-{sec}.png")
@@ -35,7 +35,7 @@ v.send(sock, "Emulation.setDeviceMetricsOverride",
 time.sleep(0.5)
 v.recv_until(sock, v.send(sock, "Page.navigate", {"url": URL + "?m=" + str(int(time.time()))}), timeout=25)
 time.sleep(3.5); v.drain(sock, 0.8)
-for sec in ("chapter-select", "hall-of-fame"):
+for sec in ("hall-of-fame",):
     ev(f"document.getElementById('{sec}').scrollIntoView({{behavior:'auto',block:'start'}})")
     time.sleep(1.4)
     v.shot(sock, f"new-{sec}-mobile.png")

@@ -61,13 +61,7 @@ def main():
     time.sleep(0.6); shot(sock, "2-chapter-menu")
     ev(sock, "document.getElementById('chapter-menu').setAttribute('hidden','')")
 
-    # 3. cut-paper wipe mid-sweep
-    ev(sock, "document.getElementById('chapter-wipe-label').textContent='OPEN THE ARCHIVE';"
-             "document.getElementById('chapter-wipe').classList.add('is-running')")
-    time.sleep(0.22); shot(sock, "3-cutpaper-wipe")
-    ev(sock, "document.getElementById('chapter-wipe').classList.remove('is-running')")
-
-    # 4. intro screen
+    # 3. intro screen
     ev(sock, """(function(){
       if(!document.getElementById('intro')){
         var d=document.createElement('div');d.className='intro';d.id='intro';
@@ -77,19 +71,12 @@ def main():
       document.getElementById('intro').removeAttribute('hidden');
       document.getElementById('intro-fill').style.transform='scaleX(0.55)';
     })()""")
-    time.sleep(0.5); shot(sock, "4-intro")
+    time.sleep(0.5); shot(sock, "3-intro")
     ev(sock, "document.getElementById('intro')?.remove()")
 
-    # 5. all-out close
-    ev(sock, """(function(){
-      document.getElementById('allout').removeAttribute('hidden');
-      document.getElementById('allout').scrollIntoView({block:'center'});
-    })()""")
-    time.sleep(0.8); shot(sock, "5-allout")
-
-    # 6. story beat (chapter-select section)
-    ev(sock, "document.getElementById('chapter-select').scrollIntoView({block:'center'})")
-    time.sleep(0.8); shot(sock, "6-story-beat")
+    # 4. story beat (hall-of-fame section)
+    ev(sock, "document.getElementById('hall-of-fame').scrollIntoView({block:'center'})")
+    time.sleep(0.8); shot(sock, "4-story-beat")
 
     v.cleanup(); print("done")
 

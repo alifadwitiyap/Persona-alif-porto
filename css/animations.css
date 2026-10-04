@@ -100,59 +100,10 @@
   100% { transform: scale(1) rotate(0deg); opacity: 1; }
 }
 
-/* ============================================================
-   Chapter select — active-item comic impact
-   The list is always in the document (no overlay, no open/close
-   state): the section resolver mirrors the active section onto the
-   matching row, and that row gets the kinetic treatment below.
-   ============================================================ */
-
-/* ---- Comic impact on the active chapter ----
-   Hard white panel outline + black/red offset shadow, a red speed-line that
-   snaps out from the left, and a one-shot "stamp" pop on the label. The pop
-   lives on the label (not the link) so it never fights the link's skew or the
-   hover translate. */
-
-.chapter-select__link[data-active="true"] {
-  color: var(--paper);
-  outline: 3px solid var(--paper);
-  outline-offset: 3px;
-  text-shadow: 4px 4px 0 #000, 7px 7px 0 var(--accent);
-}
-.chapter-select__link[data-active="true"] .chapter-select__label {
-  display: inline-block;            /* transforms need a non-inline box */
-  transform-origin: left center;
-  animation: nav-impact var(--t-med) var(--ease-snap) both;
-}
-@keyframes nav-impact {
-  0%   { transform: scale(0.82) skewX(4deg); }
-  55%  { transform: scale(1.07) skewX(-3deg); }
-  100% { transform: scale(1)    skewX(0deg); }
-}
-.chapter-select__link[data-active="true"]::before {
-  content: "";
-  position: absolute;
-  left: calc(var(--gutter) * -0.55);   /* stays inside the section gutter */
-  top: 50%;
-  width: clamp(10px, 0.7em, 26px);
-  height: 0.14em;
-  min-height: 5px;
-  background: var(--accent);
-  transform-origin: left center;
-  animation: nav-line var(--t-med) var(--ease-snap) both;
-}
-@keyframes nav-line {
-  from { transform: translateY(-50%) skewX(-20deg) scaleX(0); }
-  to   { transform: translateY(-50%) skewX(-20deg) scaleX(1); }
-}
-
 @media (prefers-reduced-motion: reduce) {
   .reveal, .reveal--stagger > * { opacity: 1; transform: none; }
   [data-swipe] { opacity: 1; clip-path: none; }
   [data-swipe]::after { display: none; }
   .section::after { display: none; }
   .caret::after { animation: none; }
-  /* The active chapter keeps its colour/outline change; the motion collapses. */
-  .chapter-select__link[data-active="true"] .chapter-select__label { animation: none; }
-  .chapter-select__link[data-active="true"]::before { display: none; }
 }

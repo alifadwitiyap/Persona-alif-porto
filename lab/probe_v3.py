@@ -1,5 +1,5 @@
-"""Fan-in probe for the v3 features: overlay menu, progress bar, intro, wipe,
-all-out close. Reuses lab/verify.py CDP helpers.
+"""Fan-in probe for the v3 features: overlay menu, progress bar, intro,
+transition-overlay-removed, all-out close. Reuses lab/verify.py CDP helpers.
 
 Usage: python lab/probe_v3.py [url]
 """
@@ -125,23 +125,21 @@ check("menu closed after navigation", ev("document.getElementById('chapter-menu'
 print("=== STORY BEATS ===")
 nav(f"{URL}?p4={ts}")
 beats = ev("[...document.querySelectorAll('[data-story-beat]')].map(e=>e.textContent.trim()).filter(Boolean).length")
-check("story beats filled (>=7)", beats is not None and beats >= 7, beats)
+check("story beats filled (>=6 mood sections)", beats is not None and beats >= 6, beats)
 
-# ============ ALL-OUT CLOSE ============
-print("=== ALL-OUT CLOSE ===")
-nav(f"{URL}?p5={ts}")
-check("all-out present", ev("!!document.getElementById('allout')"), None)
-check("all-out hidden until revealed", ev("document.getElementById('allout').hidden"), None)
-
-# ============ REDUCED MOTION (no wipe) ============
-print("=== REDUCED MOTION ===")
+# ============ TRANSITION OVERLAY REMOVED ============
+print("=== TRANSITION OVERLAY REMOVED ===")
 v.send(sock, "Emulation.setEmulatedMedia",
        {"features": [{"name": "prefers-reduced-motion", "value": "reduce"}]})
 nav(f"{URL}?p6={ts}")
 ev("document.getElementById('case-files').scrollIntoView()")
 time.sleep(0.4)
-playing = ev("document.getElementById('chapter-wipe')?.classList.contains('is-playing')")
-check("wipe does NOT play under reduced-motion", playing is False, playing)
+check("no transition overlay (chapter-wipe absent)",
+      ev("document.getElementById('chapter-wipe') === null"),
+      ev("!!document.getElementById('chapter-wipe')"))
+check("no transition overlay (.space-shift absent)",
+      ev("document.querySelector('.space-shift') === null"),
+      ev("!!document.querySelector('.space-shift')"))
 v.send(sock, "Emulation.setEmulatedMedia", {"features": []})
 
 # ============ CONSOLE ============

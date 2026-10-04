@@ -14,6 +14,10 @@
  *  4. Portrait orbit — a rotating accent ring that tracks the hero portrait.
  *  5. Hall of Fame beat — a bounded, one-shot "recognition" pulse that fires
  *     when the hall-of-fame section becomes active, then settles back to rest.
+ *  6. Camera space-shift — on every section change the camera banks into the
+ *     travel direction and the whole group counter-drifts (a bounded one-shot
+ *     impulse; the shape/gains live in js/camera-shift.js). Lateral parallax
+ *     only — it never becomes a Z dolly.
  */
 import * as THREE from "three";
 import { EffectComposer } from "three/addons/postprocessing/EffectComposer.js";
@@ -25,6 +29,7 @@ import {
   pickAspectPreset,
   resolveSectionScene,
 } from "./data/section-moods.js";
+import { createShift, fireShift, stepShift, SPACE_SHIFT } from "./camera-shift.js";
 
 /**
  * Section ids in document order. js/data/section-moods.js is the single source
@@ -344,6 +349,7 @@ export function createScene(canvas, { tier, reduced = false } = {}) {
     camYTarget: initial.camY,
     camY: initial.camY,
     pointerX: 0, pointerY: 0,
+    shift: createShift(),
     running: false,
   };
 
@@ -368,6 +374,10 @@ export function createScene(canvas, { tier, reduced = false } = {}) {
   function setActive(id) {
     const sec = resolveSectionScene(id, aspect);
     if (!sec) return;
+    // Camera delta from the section we are leaving — drives the space-shift
+    // direction and strength. Read BEFORE the targets are overwritten.
+    const dx = sec.camX - state.camXTarget;
+    const dy = sec.camY - state.camYTarget;
     state.active = id;
     state.focusTarget = sec.focus;
     state.camXTarget = sec.camX;
@@ -384,7 +394,10 @@ export function createScene(canvas, { tier, reduced = false } = {}) {
       beatT = -1;
       hofBeat.visible = false;
     }
-    if (!reduced) warpT = 0; // fire the warp burst
+    if (!reduced) {
+      warpT = 0; // fire the warp burst
+      fireShift(state.shift, dx, dy); // bank the camera into the travel direction
+    }
   }
 
   /** Light the 3D timeline node for the Nth visible experience card. */
@@ -442,15 +455,25 @@ export function createScene(canvas, { tier, reduced = false } = {}) {
     state.camX += (state.camXTarget - state.camX) * 0.05;
     state.camY += (state.camYTarget - state.camY) * 0.05;
 
+    // Camera space-shift: a bounded one-shot impulse fired on section change.
+    // `e` is exactly 0 at rest (and while reduced-motion never fires it), so
+    // the camera and group return to their base pose with no residual offset.
+    const e = stepShift(state.shift, dt);
+    const sx = e * state.shift.dx * state.shift.mag;
+    const sy = e * state.shift.dy * state.shift.mag;
+
     const px = state.pointerX * 0.5;
     const py = state.pointerY * 0.28;
-    camera.position.x = state.camX + px;
-    camera.position.y = state.camY + py;
+    camera.position.x = state.camX + px + sx * SPACE_SHIFT.camPush;
+    camera.position.y = state.camY + py + sy * SPACE_SHIFT.camLift;
     camera.position.z = 6;
     camera.lookAt(px * 0.35, py * 0.35, 0);
+    // Bank the camera into the travel direction. Applied AFTER lookAt (as a
+    // local-Z roll) so the orientation solve does not overwrite it.
+    if (sx) camera.rotateZ(-sx * SPACE_SHIFT.camRoll);
 
-    group.rotation.y = Math.sin(t * 0.12) * 0.12 + px * 0.12;
-    group.rotation.x = Math.sin(t * 0.09) * 0.06 - py * 0.08;
+    group.rotation.y = Math.sin(t * 0.12) * 0.12 + px * 0.12 - sx * SPACE_SHIFT.groupYaw;
+    group.rotation.x = Math.sin(t * 0.09) * 0.06 - py * 0.08 + sy * SPACE_SHIFT.groupYaw * 0.5;
 
     core.rotation.y += dt * 0.00022;
     core.rotation.x += dt * 0.00013;

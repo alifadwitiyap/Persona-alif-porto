@@ -111,13 +111,19 @@ def main():
     check("S3 landed near identity-file",
           t3 is not None and abs(t3) < 250, t3)
 
-    # ============ S4: every chapter anchor resolves ============
-    print("=== S4: chapter anchor integrity ===")
+    # ============ S4: chapter menu overlay items resolve ============
+    print("=== S4: chapter menu integrity ===")
     nav(sock, f"{URL}?s4={ts}")
-    hrefs = ev(sock, "[...document.querySelectorAll('#chapter-list a')].map(a=>a.getAttribute('href'))") or []
-    check("S4 six chapter links", len(hrefs) == 6, hrefs)
-    broken = ev(sock, "[...document.querySelectorAll('#chapter-list a')].filter(a=>!document.querySelector(a.getAttribute('href'))).map(a=>a.getAttribute('href'))") or []
-    check("S4 no broken anchors", broken == [], broken)
+    # The in-page chapter list was removed; navigation is the overlay menu. Open
+    # it (key M) and assert every item targets a real section id.
+    ev(sock, "document.dispatchEvent(new KeyboardEvent('keydown',{key:'m',bubbles:true}))")
+    time.sleep(0.4)
+    ids = ev(sock, "[...document.querySelectorAll('#chapter-menu-list .chapter-menu__link')].map(b=>b.getAttribute('data-goto'))") or []
+    check("S4 six chapter targets", len(ids) == 6, ids)
+    broken = ev(sock, "[...document.querySelectorAll('#chapter-menu-list .chapter-menu__link')].map(b=>b.getAttribute('data-goto')).filter(id=>!document.getElementById(id))") or []
+    check("S4 no broken targets", broken == [], broken)
+    ev(sock, "document.dispatchEvent(new KeyboardEvent('keydown',{key:'Escape',bubbles:true}))")
+    time.sleep(0.3)
 
     # ============ S5: M shortcut ignores typing targets ============
     print("=== S5: M shortcut guard ===")
@@ -156,7 +162,7 @@ def main():
     time.sleep(1.5)
     sec = ev(sock, "document.documentElement.dataset.section")
     check("S7 active section is a known id after rapid scroll",
-          sec in ("hero","chapter-select","identity-file","hall-of-fame","skill-arsenal","mission-log","case-files","open-channel"),
+          sec in ("hero","identity-file","hall-of-fame","skill-arsenal","mission-log","case-files","open-channel"),
           sec)
     check("S7 only one .is-active section",
           ev(sock, "document.querySelectorAll('main section.is-active').length") <= 1,
@@ -167,7 +173,7 @@ def main():
     mobile(sock)
     nav(sock, f"{URL}?s8={ts}", settle=4.0)
     bad = []
-    for sid in ("hero","chapter-select","identity-file","hall-of-fame","skill-arsenal","mission-log","case-files","open-channel"):
+    for sid in ("hero","identity-file","hall-of-fame","skill-arsenal","mission-log","case-files","open-channel"):
         ev(sock, f"document.getElementById('{sid}').scrollIntoView()")
         time.sleep(0.7)
         ov = ev(sock, "document.documentElement.scrollWidth > document.documentElement.clientWidth + 1")
@@ -181,8 +187,8 @@ def main():
     v.send(sock, "Emulation.setDeviceMetricsOverride", {"width": 1440, "height": 900, "deviceScaleFactor": 1, "mobile": False})
     # hard to force no-WebGL; instead verify content independent of canvas
     nav(sock, f"{URL}?s9={ts}")
-    check("S9 all 8 sections present without relying on canvas",
-          ev(sock, "document.querySelectorAll('main section').length") == 8,
+    check("S9 all 7 sections present without relying on canvas",
+          ev(sock, "document.querySelectorAll('main section').length") == 7,
           ev(sock, "document.querySelectorAll('main section').length"))
     check("S9 canvas is aria-hidden decorative",
           ev(sock, "document.querySelector('.stage')?.getAttribute('aria-hidden')") == "true",

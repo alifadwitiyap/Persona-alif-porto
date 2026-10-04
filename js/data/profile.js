@@ -1,36 +1,48 @@
 /**
  * profile.js — single source of truth for identity + copy.
- * Content is grounded in the LinkedIn profile; no invented claims or numbers.
- * No phone number or private contact is stored here.
+ * Content is grounded in the LinkedIn profile (latest copy); no invented
+ * claims or numbers. No phone number or private contact is stored here.
  */
 export const profile = {
   name: "Alif Adwitiya Pratama",
   handle: "alifadwitiyap",
-  role: "T-Shaped Data Scientist",
+  role: "Assistant Manager — Collection System & Data Analyst",
   // Kept short for the hero; the long headline lives in `headline`.
   headline:
-    "T-Shaped Data Scientist \u00b7 Assistant Manager at Bank Mandiri \u00b7 " +
-    "Distinction Graduate, Bangkit Academy 2022",
+    "Assistant Manager at Bank Mandiri \u00b7 Collection System & Data Analyst \u00b7 " +
+    "AI & Data",
   tagline: "Built 4 Life[\u2665] \u2014 From real life needs to real life solutions.",
   location: "Jakarta, ID",
   links: {
     github: "https://github.com/alifadwitiyap",
     linkedin: "https://www.linkedin.com/in/alifadwitiyap/",
-    // Email intentionally omitted until a public address is provided.
-    email: "",
+    email: "alifadwitiyap@gmail.com",
   },
+  // Latest LinkedIn "About" copy, including the awards paragraph (user request
+  // 2026-10-04: keep the cum laude / Bangkit / competitions paragraph IN the
+  // Identity File too). The Hall of Fame keeps the itemised receipts; this is
+  // the narrative version.
   about: [
     "Assistant Manager at Bank Mandiri, joining through the Officer Development " +
-      "Program. I handle Collection Systems from the business side: gathering " +
-      "requirements with users, improving the system, and making sure operations " +
-      "run smoothly and reliably.",
-    "I graduated with distinction from Telkom University with a T-shaped skill set " +
-      "in software engineering and a focus on data science. I also work in " +
-      "back-end development and cloud computing, which helps me approach problems " +
-      "from more than one angle.",
-    "I'm most interested in AI \u2014 especially agentic tools and process " +
-      "automation \u2014 and in building solutions that are actually more efficient " +
-      "and more intelligent than what came before.",
+      "Program (ODP). I help collection operations become more reliable, " +
+      "efficient, and data-informed by connecting business needs, systems " +
+      "delivery, analytics, and process automation.",
+    "I work at the intersection of business operations, data analytics, IT " +
+      "support, and system improvement. My role involves collaborating with " +
+      "users and IT teams to understand operational needs, translate them into " +
+      "system requirements, improve process reliability, and support " +
+      "data-driven decision-making in collection operations.",
+    "Along the way, I graduated cum laude in Informatics from Telkom University " +
+      "with a GPA of 3.90/4.00 and was a Google Bangkit Academy 2022 " +
+      "Distinction Graduate (top 10% of graduates). I was 1st Winner in the " +
+      "Data Analysis Competition IFest UNPAD 2022 and the Data Competition " +
+      "ISFEST UMN 2021, and a finalist in Statistics In Action 2021, published " +
+      "an open-source Python package (NDETCStemmer) on PyPI and contributed to " +
+      "a Bangkit capstone recommender system selected among the top 53 of 433 " +
+      "projects.",
+    "I'm particularly interested in AI, especially agentic tools for process " +
+      "automation, and I enjoy exploring ways to build more efficient and " +
+      "intelligent solutions.",
   ],
   // From the LinkedIn profile's top skills + skills section.
   skills: [

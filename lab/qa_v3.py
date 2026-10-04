@@ -1,5 +1,5 @@
 """UltraQA — adversarial scenarios for the v3 features (menu, progress, intro,
-wipe, all-out). Prints PASS/FAIL; exit 1 on any failure.
+transition-overlay-removed). Prints PASS/FAIL; exit 1 on any failure.
 
 Usage: python lab/qa_v3.py [url]
 """
@@ -39,37 +39,22 @@ def ev(e): return v.ev(sock, e)
 v.send(sock, "Emulation.setDeviceMetricsOverride", {"width": 1440, "height": 900, "deviceScaleFactor": 1, "mobile": False})
 ts = str(int(time.time()))
 
-# ---- Q1: All-Out Portfolio must actually be reachable ----
-print("=== Q1: all-out reachable ===")
-nav(f"{URL}?q1={ts}")
-# scroll to the very end of case-files (all projects seen). scroll-behavior is
-# smooth, so poll until the scroll settles before asserting.
-ev("window.scrollTo({top: document.getElementById('case-files').offsetTop + document.getElementById('case-files').offsetHeight, behavior:'auto'})")
-for _ in range(14):
-    time.sleep(0.3)
-    if ev("!document.getElementById('allout').hidden"):
-        break
-revealed = ev("!document.getElementById('allout').hidden")
-check("all-out reveals after viewing case-files", revealed, ev("document.getElementById('allout').hidden"))
-
-# ---- Q2: wipe plays on a real section change (non-reduced) ----
-print("=== Q2: wipe plays ===")
+# ---- Q2: transition overlay is gone (chapter-wipe + .space-shift absent) ----
+print("=== Q2: transition overlay removed ===")
 nav(f"{URL}?q2={ts}")
-# install an observer to catch the wipe's class change reliably (the sweep
-# restarts via a forced reflow, so a fixed sleep can miss it)
-ev("""(function(){
-  window.__wipeSeen = false;
-  var w = document.getElementById('chapter-wipe');
-  if(!w) return;
-  new MutationObserver(function(){ if(w.classList.contains('is-running')) window.__wipeSeen = true; })
-    .observe(w, {attributes:true, attributeFilter:['class']});
-})()""")
+no_wipe = ev("document.getElementById('chapter-wipe') === null")
+no_shift = ev("document.querySelector('.space-shift') === null")
+check("chapter-wipe absent", no_wipe, ev("!!document.getElementById('chapter-wipe')"))
+check(".space-shift absent", no_shift, ev("!!document.querySelector('.space-shift')"))
+# a real section change must not resurrect an overlay layer
 ev("document.getElementById('menu-btn').click()")
 time.sleep(0.4)
 ev("document.querySelector('#chapter-menu-list [data-goto=\"hall-of-fame\"]').click()")
 time.sleep(1.2)
-played = ev("window.__wipeSeen === true")
-check("wipe plays during a section change", played, played)
+check("no overlay after a real section change",
+      ev("document.getElementById('chapter-wipe') === null && "
+         "document.querySelector('.space-shift') === null"),
+      ev("!!document.querySelector('.space-shift')"))
 
 # ---- Q3: menu focus trap keeps focus inside ----
 print("=== Q3: menu focus trap ===")

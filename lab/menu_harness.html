@@ -24,10 +24,6 @@
 
   <main>
     <section class="section" id="hero"><h1>Hero</h1></section>
-    <section class="section chapter-select" id="chapter-select">
-      <h2>Select Chapter</h2>
-      <nav aria-label="Portfolio chapters"><ol id="chapter-list"></ol></nav>
-    </section>
     <section class="section" id="identity-file"><h2>Identity</h2></section>
     <section class="section" id="hall-of-fame"><h2>Hall</h2></section>
     <section class="section" id="skill-arsenal"><h2>Skills</h2></section>
@@ -55,10 +51,9 @@
 
   <script type="module">
     import { initMenu } from "../js/ui/menu.js";
-    import { initChapterSelect } from "../js/chapter-select.js";
 
     // Minimal stand-in for the resolver: goTo scrolls + mirrors the hash, and
-    // the harness then mirrors the active id into both surfaces (like main.js).
+    // the harness then mirrors the active id into the overlay (like main.js).
     let active = "hero";
     const sections = {
       get active() { return active; },
@@ -66,11 +61,9 @@
         document.getElementById(id)?.scrollIntoView({ behavior: "auto", block: "start" });
         history.replaceState(null, "", `#${id}`);
         active = id;
-        chapters.setActive(id);
         menu.setActive(id);
       },
     };
-    const chapters = initChapterSelect({ getActive: () => active });
     const menu = initMenu({ sections, getActive: () => active });
     window.__menu = menu;
   </script>

@@ -1,6 +1,6 @@
 /* ============================================================
    components.css — hero, sticky portrait, panels, cards,
-   timeline, statcard, buttons, tags. Persona-5 look, original.
+   timeline, identity card, buttons, tags. Persona-5 look, original.
    ============================================================ */
 
 /* ---------- Hero ---------- */
@@ -378,37 +378,49 @@
   color: var(--accent);
 }
 
-/* ---------- Stat card (profile quick facts) ---------- */
-.profile__grid {
+/* ---------- Identity card (ONE box: bio + quick facts) ----------
+   The old layout split the identity file into two separate boxes (a bio
+   panel and a statcard). This is a single card: the bio copy and the
+   quick-facts list are two regions of the same bordered surface, so the
+   section reads as one artifact instead of two competing ones. */
+.identity-card {
   display: grid;
   grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr);
-  gap: clamp(1.5rem, 4vw, 3rem);
+  gap: clamp(1.25rem, 3vw, 2.5rem);
   align-items: start;
-}
-.statcard {
   background: var(--ink-card);
   border: 3px solid var(--accent);
   clip-path: var(--clip-panel);
   padding: var(--sp-5);
   box-shadow: var(--shadow-black);
-  transform: rotate(1deg);
+  transform: rotate(-0.4deg);
+  backdrop-filter: blur(3px);
 }
-.statcard__row {
+.identity-card__body { min-width: 0; }
+/* Quick-facts column: separated from the bio by a divider, not a second
+   card border, so the single-box read is preserved. */
+.identity-card__facts {
+  margin: 0;
+  padding-left: clamp(1.25rem, 3vw, 2.5rem);
+  border-left: 1px dashed var(--ink-3);
+}
+.identity-card__fact {
   display: flex;
   align-items: baseline;
   gap: var(--sp-3);
   padding: var(--sp-3) 0;
   border-bottom: 1px dashed var(--ink-3);
 }
-.statcard__row:last-child { border-bottom: 0; }
-.statcard__row b {
+.identity-card__fact:first-child { padding-top: 0; }
+.identity-card__fact:last-child { border-bottom: 0; padding-bottom: 0; }
+.identity-card__fact b {
   font-family: var(--font-hero);
   font-size: var(--step-2);
   color: var(--accent);
   line-height: 1;
   min-width: 3.4ch;
 }
-.statcard__row span { color: var(--paper-dim); font-size: var(--step--1); }
+.identity-card__fact span { color: var(--paper-dim); font-size: var(--step--1); }
 
 /* ---------- Tags / chips ---------- */
 .tags { display: flex; flex-wrap: wrap; gap: var(--sp-2); }
@@ -677,61 +689,6 @@
   clip-path: var(--clip-tag);
 }
 .modal__close:hover { background: var(--accent); color: var(--ink); border-color: var(--accent); }
-
-/* ---------- Chapter select (in-page navigator section) ----------
-   A real, always-present section right after the hero — NOT an overlay.
-   Scroll stays the source of truth: this list only mirrors the active section
-   (data-active) and its links are native anchors (`href="#id"`), so they work
-   with JS disabled, are deep-linkable and land in browser history. Original
-   "Signal Archive" vocabulary, no in-universe Persona 5 assets. */
-.chapter-select__list {
-  display: grid;
-  gap: var(--sp-2);
-  margin-top: var(--sp-5);
-  border-top: 3px solid var(--ink-3);
-}
-.chapter-select__link {
-  position: relative;            /* anchor for the active speed-line ::before */
-  display: flex;
-  align-items: baseline;
-  gap: var(--sp-4);
-  padding: var(--sp-4) var(--sp-2);
-  border-bottom: 3px solid var(--ink-3);
-  font-family: var(--font-display);
-  font-size: var(--step-3);
-  line-height: 1;
-  text-transform: uppercase;
-  color: var(--paper-dim);
-  transform: skewX(-6deg);
-  transition: color var(--t-fast), transform var(--t-med) var(--ease-out),
-              border-color var(--t-fast), background var(--t-fast);
-}
-.chapter-select__link:hover,
-.chapter-select__link:focus-visible {
-  color: var(--paper);
-  border-bottom-color: var(--paper);
-  transform: skewX(-6deg) translateX(8px);
-}
-.chapter-select__link[data-active="true"] { color: var(--paper); }
-.chapter-select__num {
-  flex: 0 0 auto;
-  min-width: 2.4ch;
-  font-family: var(--font-mono);
-  font-size: var(--step-1);
-  color: var(--muted);
-  transition: color var(--t-fast);
-}
-.chapter-select__link[data-active="true"] .chapter-select__num { color: var(--accent); }
-.chapter-select__label { min-width: 0; overflow-wrap: anywhere; }
-/* The HUD name is a quiet right-aligned tag; it drops on narrow screens. */
-.chapter-select__hud {
-  margin-left: auto;
-  font-family: var(--font-mono);
-  font-size: var(--step--1);
-  letter-spacing: 0.12em;
-  text-transform: none;
-  color: var(--muted);
-}
 
 /* ---------- MENU trigger (topbar) ---------- */
 .menu-btn {

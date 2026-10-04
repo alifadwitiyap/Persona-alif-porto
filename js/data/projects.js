@@ -1,7 +1,7 @@
 /**
  * projects.js — the ONLY source of project data (Decision D4).
- * Scope: ONLY the repositories Alif pinned on GitHub (verified via the GitHub
- * REST API `pinnedItems`/repo metadata). The old 12-repo dump was removed.
+ * Scope: the pinned repositories Alif keeps on GitHub (verified via the GitHub
+ * REST API `pinnedItems`/repo metadata).
  *
  * Descriptions were copied from each repo's own GitHub description/README
  * (verified 2026-10-03) — never guessed. `fork: true` marks a pinned fork of a
@@ -36,49 +36,6 @@ export const projects = [
       "A tiny web app that breaks a long password or string into vertical " +
       "per-character output.",
     url: "https://github.com/alifadwitiyap/unword",
-  },
-  {
-    id: "online-store-digital-records",
-    name: "online-store-digital-records",
-    featured: false,
-    lang: "JavaScript",
-    stars: 1,
-    year: "2022",
-    topics: ["web", "inventory", "fuzzy-logic"],
-    fork: true,
-    desc:
-      "Online-store inventory system: stock and sales records, progress " +
-      "reporting, and AI-assisted restock suggestions (fuzzy score). Team project.",
-    url: "https://github.com/alifadwitiyap/online-store-digital-records",
-  },
-  {
-    id: "ibm-data-science-capstone",
-    name: "IBM-DATA-SCIENCE-CAPSTONE",
-    featured: false,
-    lang: "Jupyter Notebook",
-    stars: 0,
-    year: "2024",
-    topics: ["data-science", "machine-learning", "visualization"],
-    desc:
-      "End-to-end data-science capstone on SpaceX Falcon 9 launches: data " +
-      "collection, wrangling, exploratory analysis, visualization, and a model " +
-      "predicting first-stage landing success.",
-    url: "https://github.com/alifadwitiyap/IBM-DATA-SCIENCE-CAPSTONE",
-  },
-  {
-    id: "c22-ps168-machine-learning",
-    name: "C22-PS168-Machine-Learning",
-    featured: false,
-    lang: "Python",
-    stars: 0,
-    year: "2022",
-    topics: ["bangkit", "machine-learning", "capstone"],
-    fork: true,
-    desc:
-      "Machine-learning workspace for the Bangkit capstone (team " +
-      "TheRisingStarTeam). My role: data preprocessing, data pipeline, " +
-      "scheduling, and integrating the model into the database.",
-    url: "https://github.com/alifadwitiyap/C22-PS168-Machine-Learning",
   },
   {
     id: "wa-bulk",

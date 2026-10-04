@@ -4,7 +4,9 @@
  * No invented numbers; only what the profile states.
  *
  * Field notes:
- *   `more` (optional) — a public profile URL for a "see more" affordance.
+ *   `more` (optional) — a public profile URL for a per-card "see more"
+ *   affordance. Currently unused: the section shows ONE "See more on
+ *   LinkedIn" link at the end (rendered by ui.js), not one per card.
  */
 export const experience = [
   {
@@ -51,18 +53,6 @@ export const experience = [
       "Built a recommender system selected as one of the TOP 53 projects out of 433.",
     ],
     tags: ["Machine Learning", "Recommender", "Distinction", "TOP 53"],
-    more: "https://www.linkedin.com/in/alifadwitiyap/",
-  },
-  {
-    id: "dts-dev",
-    org: "Digital Talent Scholarship",
-    role: "Fresh Graduate Academy — Cloud Developing Trainee",
-    period: "Sep 2022 — Oct 2022",
-    place: "Remote",
-    kind: "Apprenticeship",
-    accent: "#22e0f5",
-    points: ["Hands-on AWS cloud-development training."],
-    tags: ["AWS", "Cloud"],
   },
 ];
 

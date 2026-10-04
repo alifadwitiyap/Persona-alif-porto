@@ -1,11 +1,9 @@
 /**
- * menu.js — the chapter OVERLAY (a modal dialog, unlike the in-page
- * chapter-select section).
+ * menu.js — the chapter OVERLAY (a modal dialog).
  *
  * Architecture (see docs/plans/2026-10-04-overlay-progress-intro-cinematic.md §2a/§2b):
  *   scroll → sections.js resolver → active id
  *                                 ├→ scene.setActive(id)
- *                                 ├→ chapterSelect.setActive(id)   (in-page list, highlight)
  *                                 └→ chapterMenu.setActive(id)     (overlay list, highlight)
  *   MENU button / key M / Esc / backdrop → open/close the overlay
  *   overlay item click → close → sectionsCtl.goTo(id) → resolver confirms

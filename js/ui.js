@@ -31,7 +31,10 @@ export function renderSkills() {
     .join("");
 }
 
-/* ---------- Experience (timeline) ---------- */
+/* ---------- Experience (timeline) ----------
+   Rows are rendered from the data file; the "See more on LinkedIn" link is a
+   SINGLE affordance at the end of the section (into #mission-log-more), not one
+   per card, so the timeline stays clean and the link is easy to find. */
 export function renderExperience() {
   const slot = $("#timeline");
   if (!slot) return;
@@ -49,14 +52,17 @@ export function renderExperience() {
           ${e.points.map((p) => `<li>${p}</li>`).join("")}
         </ul>
         <div class="tags">${e.tags.map((t) => `<span class="tag">${t}</span>`).join("")}</div>
-        ${
-          e.more
-            ? `<a class="tl-item__more" href="${e.more}" rel="noopener" target="_blank">See more on LinkedIn</a>`
-            : ""
-        }
       </li>`
     )
     .join("");
+
+  const moreSlot = $("#mission-log-more");
+  if (moreSlot) {
+    const url = profile.links?.linkedin;
+    moreSlot.innerHTML = url
+      ? `<a class="btn btn--primary" href="${url}" rel="noopener" target="_blank">See more on LinkedIn</a>`
+      : "";
+  }
 }
 
 /* ---------- Hall of Fame (achievements dossier) ---------- */

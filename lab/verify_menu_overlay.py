@@ -217,10 +217,7 @@ def main():
           ev(sock, "document.querySelector('#chapter-menu-list .chapter-menu__link[data-active=\\\"true\\\"]')?.getAttribute('data-goto')"),
           "case-files")
     check("single-active-overlay",
-          ev(sock, "document.querySelectorAll('#chapter-menu-list .chapter-menu__link[data-active=\\\"true\\\"]').length"), 1)
-    check("in-page-list-also-mirrored",
-          ev(sock, "document.querySelector('#chapter-list .chapter-select__link[data-active=\\\"true\\\"]')?.getAttribute('data-goto')"),
-          "case-files")
+          ev(sock, "[...document.querySelectorAll('#chapter-menu-list .chapter-menu__link')].filter(b=>b.getAttribute('data-active')==='true').length"), 1)
 
     print("=== BACKDROP CLOSES ===")
     ev(sock, "document.getElementById('menu-btn').click()")
@@ -229,9 +226,9 @@ def main():
     time.sleep(0.3)
     check("backdrop-closes", ev(sock, "document.getElementById('chapter-menu').hidden"), True)
 
-    print("=== NO M HANDLER LEAK FROM chapter-select.js ===")
-    # chapter-select no longer binds M: pressing M while the overlay is CLOSED
-    # must open the OVERLAY (menu.js), never scroll to #chapter-select.
+    print("=== M OPENS THE OVERLAY (no in-page chapter-select handler) ===")
+    # Only the overlay menu binds M: pressing M while the overlay is CLOSED
+    # must open the OVERLAY (menu.js).
     ev(sock, "window.scrollTo(0, document.body.scrollHeight)")
     time.sleep(0.3)
     ev(sock, "document.body.focus()")
