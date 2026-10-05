@@ -16,10 +16,11 @@
   --red: #e51e2b;
   --red-deep: #9e121b;
   --red-hot: #ff3344;
+  --red-aa: #f93541;
   --amber: #ffb020;
   --white: #ffffff;
 
-  --accent: var(--red);
+  --accent: var(--red-aa);
   --accent-deep: var(--red-deep);
 
   /* Typography — Anton heavy slanted display; Bebas Neue caps UI;
@@ -85,6 +86,6 @@ html[data-section="skill-arsenal"],
 html[data-section="mission-log"],
 html[data-section="case-files"],
 html[data-section="open-channel"] {
-  --accent: var(--red);
+  --accent: var(--red-aa);
   --accent-deep: var(--red-deep);
 }

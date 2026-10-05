@@ -1,6 +1,9 @@
 # Draft: Rencana Peningkatan Situs "4 LIFE" Portfolio
 
-> **STATUS: DRAFT — belum disetujui, belum diimplementasikan.**
+> **STATUS: PARTIALLY IMPLEMENTED.** P0 subset (Task 6 Discoverability, Task 7
+> Performance, Task 8 Accessibility contrast) landed on branch
+> `improvement/aa-contrast-og-perf`, commit `9874271` — see §Progress below.
+> The rest of the plan is still DRAFT and unapproved.
 > Disusun dari debat dua model AI (Comet/Perplexity): **GPT-6.1 Sol Thinking** (draft A + kritik atas B)
 > dan **Claude Sonnet 5.5 Thinking** (draft B + kritik atas A). Hermes hanya menyintesis; isi berasal dari
 > kedua model. Klaim teknis **belum diverifikasi** terhadap repo — lihat §Verifikasi.
@@ -8,6 +11,30 @@
 > Tanggal: 2026-10-05 · Repo: `D:/project/porto-website-persona5-alif` · Live: https://alifadwitiyap.github.io/Persona-alif-porto/
 
 ---
+
+## Progress (2026-10-05)
+
+Landed on `improvement/aa-contrast-og-perf` @ `9874271` — the subset with a
+measurable, verifiable defect:
+
+- **Task 6 (partial):** `assets/images/og-cover.jpg` (1200×630) created — the
+  meta already pointed at this path but the file 404'd, so every social share
+  showed an empty preview. `og:image:width/height/type` added. Reproducible via
+  `lab/make_og_cover.py` (with a collision guard).
+- **Task 7 (partial):** `vendor/three.module.js` minified in place
+  1,304,820 → 687,337 B (ESM intact); dead 867 KB `profile-cutout-single.png`
+  removed; intro cap 3200ms → 1800ms.
+- **Task 8 (partial):** accent red raised to AA. `--accent` now resolves to new
+  `--red-aa: #f93541` (was `#e51e2b`, 4.14–4.36:1 → now 4.72–5.38:1). `--red`
+  kept for decorative shadows. Gate: `lab/check_contrast.py` (new, deterministic).
+
+Verified: `check_contrast.py` exit 0 · 3 mjs tests PASS · `verify.py`
+`webgl_state: on` / `overflow_x: False` · `verify_content.py` FAILS: none.
+
+Still open (need an owner decision): hero positioning copy (Task 2), Mission Log
+impact-first (Task 5), Identity File trim (Task 4), CI workflow (Task 9),
+deep-link per case file (Task 10), and the `og-cover.jpg` is generated from a
+local font conversion — the generator documents this.
 
 ## Goal
 
