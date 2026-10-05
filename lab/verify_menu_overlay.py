@@ -212,7 +212,15 @@ def main():
     time.sleep(0.4)
     check("click-closed", ev(sock, "document.getElementById('chapter-menu').hidden"), True)
     check("click-hash", ev(sock, "location.hash"), "#case-files")
-    check("click-scrolled", ev(sock, "Math.abs(document.getElementById('case-files').getBoundingClientRect().top) < 40"), True)
+    # After the section gains scroll-margin-top (to clear the fixed topbar), the
+    # section's top sits a little BELOW the viewport top — that is correct. The
+    # real assertion is that the section is scrolled into view AND its heading is
+    # not hidden behind the fixed topbar.
+    check("click-scrolled",
+          ev(sock, "Math.abs(document.getElementById('case-files').getBoundingClientRect().top) < 120"), True)
+    check("click-heading-clear-of-topbar",
+          ev(sock, "(()=>{const h=document.querySelector('#case-files h2').getBoundingClientRect();const t=document.querySelector('.topbar').getBoundingClientRect();return h.top>=t.bottom-1;})()"),
+          True)
     check("active-mirrored-in-overlay",
           ev(sock, "document.querySelector('#chapter-menu-list .chapter-menu__link[data-active=\\\"true\\\"]')?.getAttribute('data-goto')"),
           "case-files")

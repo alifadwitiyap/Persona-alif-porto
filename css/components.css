@@ -736,3 +736,114 @@
 }
 .menu-btn__bars::before { top: -7px; }
 .menu-btn__bars::after { top: 7px; }
+
+/* ============================================================
+   EVIDENCE-FIRST CASE FILES + HERO CTA + A11Y  (2026-10-05)
+   Added for the portfolio improvement wave: a case-study block
+   (Problem / Role / Approach / optional Outcome + proof links + why)
+   rendered by js/ui.js from each project's optional `caseFile`, a
+   primary hero CTA, a confidentiality disclosure, and two baseline
+   accessibility rules (focus-visible + anchor offset under the topbar).
+   ============================================================ */
+
+/* --- Hero primary CTA: reuse the existing .btn--primary look, just sit first --- */
+.hero__cta {
+  /* .btn--primary already carries the accent fill; only nudge spacing so it
+     reads as the leading action without restyling the shared button. */
+  margin-right: var(--sp-2);
+}
+
+/* --- Confidentiality disclosure under Case Files --- */
+.case-disclosure {
+  margin-top: var(--sp-5);
+  font-family: var(--font-mono);
+  font-size: var(--step--1);
+  letter-spacing: 0.04em;
+  color: var(--muted);
+  border-left: 3px solid var(--accent);
+  padding-left: var(--sp-3);
+}
+
+/* --- Case-study block (shared shape; spotlight/card differ only by prefix) --- */
+.spotlight__case,
+.card__case {
+  margin-top: var(--sp-4);
+  display: grid;
+  gap: var(--sp-2);
+  border-top: 2px solid rgba(229, 30, 43, 0.35);
+  padding-top: var(--sp-3);
+}
+
+.spotlight__case-row,
+.card__case-row {
+  display: grid;
+  grid-template-columns: minmax(88px, 116px) 1fr;
+  gap: var(--sp-3);
+  align-items: baseline;
+}
+
+.spotlight__case-label,
+.card__case-label {
+  font-family: var(--font-ui);
+  font-size: var(--step--1);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.spotlight__case-value,
+.card__case-value {
+  font-size: var(--step--1);
+  color: var(--paper-dim);
+  line-height: 1.5;
+}
+
+.spotlight__proof,
+.card__proof {
+  list-style: none;
+  margin: var(--sp-2) 0 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-2) var(--sp-4);
+}
+
+.spotlight__proof a,
+.card__proof a {
+  font-family: var(--font-mono);
+  font-size: var(--step--1);
+  color: var(--accent);
+  text-decoration: none;
+  border-bottom: 2px solid var(--accent);
+}
+
+.spotlight__why,
+.card__why {
+  margin: var(--sp-2) 0 0;
+  font-style: italic;
+  font-size: var(--step--1);
+  color: var(--paper);
+}
+
+@media (max-width: 620px) {
+  .spotlight__case-row,
+  .card__case-row { grid-template-columns: 1fr; gap: var(--sp-1); }
+}
+
+/* --- Accessibility: visible focus + anchors clear the fixed topbar --- */
+:focus-visible {
+  outline: 3px solid var(--paper);
+  outline-offset: 3px;
+}
+/* Keep the accent ring on dark surfaces legible. */
+a:focus-visible,
+button:focus-visible,
+[tabindex]:focus-visible {
+  outline-color: var(--accent);
+}
+
+section[id] {
+  /* The topbar is fixed and measures ~80px tall; this offset clears it with
+     breathing room so a hash target's heading is never hidden behind it. */
+  scroll-margin-top: 6rem; /* 96px */
+}

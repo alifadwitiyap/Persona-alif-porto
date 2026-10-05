@@ -120,6 +120,59 @@ export function renderHallOfFame() {
 }
 
 /* ---------- Projects ---------- */
+
+/**
+ * Render an evidence-first case-study block from a project's optional
+ * `caseFile` object. `prefix` is the BEM block name ("spotlight" or "card") so
+ * the same structure works in both surfaces with their own CSS hooks.
+ *
+ * Rules (frozen contract):
+ *   - Only verified facts come from the data file.
+ *   - `outcome` empty/absent  → the Outcome row is omitted entirely (never a
+ *     placeholder or TODO printed to the user).
+ *   - `proof` empty/absent    → the proof list is omitted.
+ * Returns "" when there is no `caseFile`, so callers can interpolate blindly.
+ */
+function renderCaseBlock(cf, prefix) {
+  if (!cf) return "";
+  const rows = [
+    ["Problem", cf.problem],
+    ["Role", cf.role],
+    ["Approach", cf.approach],
+    ["Outcome", cf.outcome],
+  ]
+    .filter(([, value]) => value) // drop empty/absent rows (e.g. no Outcome)
+    .map(
+      ([label, value]) => `
+        <div class="${prefix}__case-row">
+          <span class="${prefix}__case-label">${label}</span>
+          <span class="${prefix}__case-value">${value}</span>
+        </div>`
+    )
+    .join("");
+
+  const proof =
+    Array.isArray(cf.proof) && cf.proof.length
+      ? `<ul class="${prefix}__proof">${cf.proof
+          .filter((l) => l && l.url)
+          .map(
+            (l) =>
+              `<li><a href="${l.url}" rel="noopener" target="_blank">${l.label || l.url} ↗</a></li>`
+          )
+          .join("")}</ul>`
+      : "";
+
+  const why = cf.why ? `<p class="${prefix}__why">${cf.why}</p>` : "";
+
+  if (!rows && !proof && !why) return "";
+  return `
+    <div class="${prefix}__case">
+      ${rows}
+      ${proof}
+      ${why}
+    </div>`;
+}
+
 export function renderSpotlight() {
   const slot = $("#spotlight-slot");
   if (!slot || !featuredProject) return;
@@ -135,6 +188,7 @@ export function renderSpotlight() {
       <div>
         <h3 style="margin-bottom:var(--sp-3)">${f.name}</h3>
         <p class="card__desc">${f.desc}</p>
+        ${renderCaseBlock(f.caseFile, "spotlight")}
         <a class="btn btn--primary" href="${f.url}" rel="noopener" target="_blank">Open Repository</a>
       </div>
     </div>`;
@@ -158,6 +212,7 @@ export function renderProjects() {
           <span class="card__lang">${p.lang}</span>
         </div>
         <p class="card__desc">${p.desc}</p>
+        ${renderCaseBlock(p.caseFile, "card")}
         <div class="card__meta">
           <span>★ ${p.stars}</span>
           <span>${p.year}</span>
@@ -181,6 +236,40 @@ export function openModal(id) {
   const body = $("#modal-body");
   if (!p || !modal || !body) return;
   lastFocus = document.activeElement;
+
+  // Evidence-first block (reuses the same field names as the card/spotlight).
+  const cf = p.caseFile;
+  const caseRows = cf
+    ? [
+        ["Problem", cf.problem],
+        ["Role", cf.role],
+        ["Approach", cf.approach],
+        ["Outcome", cf.outcome],
+      ]
+        .filter(([, value]) => value)
+        .map(
+          ([label, value]) =>
+            `<div class="card__case-row"><span class="card__case-label">${label}</span>` +
+            `<span class="card__case-value">${value}</span></div>`
+        )
+        .join("")
+    : "";
+  const caseProof =
+    cf && Array.isArray(cf.proof) && cf.proof.length
+      ? `<ul class="card__proof">${cf.proof
+          .filter((l) => l && l.url)
+          .map(
+            (l) =>
+              `<li><a href="${l.url}" rel="noopener" target="_blank">${l.label || l.url} ↗</a></li>`
+          )
+          .join("")}</ul>`
+      : "";
+  const caseWhy = cf && cf.why ? `<p class="card__why">${cf.why}</p>` : "";
+  const caseBlock =
+    caseRows || caseProof || caseWhy
+      ? `<div class="card__case">${caseRows}${caseProof}${caseWhy}</div>`
+      : "";
+
   body.innerHTML = `
     <h3 id="modal-title">${p.name}</h3>
     <div class="tags" style="margin-bottom:var(--sp-4)">
@@ -190,6 +279,7 @@ export function openModal(id) {
       <span class="tag">${p.year}</span>
     </div>
     <p>${p.desc}</p>
+    ${caseBlock}
     <div class="tags" style="margin:var(--sp-4) 0">
       ${p.topics.map((t) => `<span class="tag">${t}</span>`).join("")}
     </div>
