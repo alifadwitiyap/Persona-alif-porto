@@ -77,7 +77,7 @@ async function init() {
 
   // 5e. Opening screen — an enhancement that never blocks beyond its timeout.
   // It overlays the page and removes itself; content underneath is already live.
-  initIntro({ maxMs: 3200 });
+  initIntro({ maxMs: 1800 });
 
   // 6. WebGL stage — decorative, guarded, disposable
   const canvas = document.getElementById("gl");
