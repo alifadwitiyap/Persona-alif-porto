@@ -448,16 +448,13 @@ html:not([data-section="hero"]) .chapter-progress__meta { color: var(--paper-dim
   border-left: 4px solid var(--accent);
   transform: skewX(-5deg);
 }
-/* Optional act tag (story-rail.js may set data-act from section-moods). */
+/* Optional act tag (story-rail.js may set data-act from section-moods).
+   DEDUP (M2): the ACT word is owned by the fixed .story-rail HUD; the in-flow
+   beat owns the SENTENCE. The attribute is still stamped (probe_transitions T1
+   counts [data-story-beat][data-act]); only its in-flow rendering is dropped so
+   the same act is not printed twice on screen. */
 .section__story[data-act]::before {
-  content: attr(data-act);
-  display: block;
-  font-family: var(--font-mono);
-  font-size: var(--step--1);
-  letter-spacing: 0.34em;
-  text-transform: uppercase;
-  color: var(--accent);
-  margin-bottom: var(--sp-1);
+  content: none;
 }
 .section.is-active .section__story {
   animation: story-beat-in var(--t-slow) var(--ease-snap) both;
@@ -478,7 +475,11 @@ html:not([data-section="hero"]) .chapter-progress__meta { color: var(--paper-dim
   color: var(--paper-dim);
 }
 .story-rail__act { display: block; color: var(--accent); }
-.story-rail__beat { display: block; color: var(--muted); }
+/* DEDUP (M2): the sentence lives in-flow (.section__story, no-JS-safe); the rail
+   is the JS-only HUD, so it keeps only the ACT marker and drops the duplicate
+   sentence from the eye. `display:none` (not removal) keeps `.textContent`
+   readable, so probe_transitions.py's beat assertions still hold. */
+.story-rail__beat { display: none; color: var(--muted); }
 
 @keyframes story-beat-in {
   from { opacity: 0; transform: translateX(-16px) skewX(-5deg); }

@@ -45,6 +45,15 @@
 /* the visual slant must not widen the layout box */
 .hero__name { display: inline-block; }
 .hero__name .line2 { display: block; color: var(--accent); transition: color var(--t-med); }
+.hero__role {
+  font-family: var(--font-ui);
+  font-weight: 400;
+  font-size: var(--step-2);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--paper);
+  margin: calc(-1 * var(--sp-3)) 0 var(--sp-4);
+}
 .hero__tagline {
   font-family: var(--font-sub);
   font-weight: 500;
@@ -275,20 +284,36 @@
   background: var(--ink-card);
   box-shadow: var(--shadow-black);
 }
-.spotlight__metric {
+/* Spotlight: the PROJECT is the hero, not its star count. The name carries the
+   display size; the GitHub-stars metric is demoted to a compact meta chip so a
+   weak number can never out-shout the work. */
+.spotlight h3 {
   font-family: var(--font-hero);
   font-size: var(--step-4);
-  color: var(--accent);
-  line-height: 0.9;
-  text-shadow: 5px 5px 0 #000;
+  line-height: 0.95;
+  margin-bottom: var(--sp-3);
+  text-shadow: 5px 5px 0 #000, 8px 8px 0 var(--accent);
 }
-.spotlight__metric small {
-  display: block;
+.spotlight__metric {
+  display: inline-flex;
+  align-items: baseline;
+  gap: var(--sp-2);
   font-family: var(--font-ui);
   font-size: var(--step-1);
-  letter-spacing: 0.2em;
   color: var(--paper-dim);
-  margin-top: var(--sp-2);
+  line-height: 1.1;
+  border: 2px solid rgba(229, 30, 43, 0.4);
+  padding: var(--sp-2) var(--sp-3);
+  clip-path: var(--clip-tag);
+  text-shadow: none;
+}
+.spotlight__metric small {
+  display: inline;
+  font-family: var(--font-ui);
+  font-size: var(--step--1);
+  letter-spacing: 0.18em;
+  color: var(--muted);
+  margin-top: 0;
   text-shadow: none;
 }
 
