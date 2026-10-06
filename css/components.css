@@ -466,6 +466,21 @@
   color: var(--paper-dim);
   clip-path: var(--clip-tag);
 }
+/* Skill Signal: only chips that link to a real project are interactive. They
+   get a pointer cursor, a focus ring, and a subtle accent on hover/focus — the
+   DOM-side emphasis that carries the signal under reduced motion (where the 3D
+   highlight is a no-op). */
+.tag--linked {
+  cursor: pointer;
+  border-color: var(--accent);
+  color: var(--paper);
+  transition: background var(--t-fast), color var(--t-fast);
+}
+.tag--linked:hover,
+.tag--linked:focus-visible {
+  background: var(--accent);
+  color: var(--ink);
+}
 /* Fork marker inside the project dossier modal. */
 .tag--fork {
   background: var(--paper);

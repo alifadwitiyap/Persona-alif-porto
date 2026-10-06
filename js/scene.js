@@ -33,6 +33,8 @@ import {
 import { createShift, fireShift, stepShift, SPACE_SHIFT } from "./camera-shift.js";
 import { resolvePose, lerpPose } from "./pose.js";
 import { rectToNdc, ndcToWorld, pickDockZone, isRectVisible } from "./dock.js";
+import { createFlythrough, fireFlythrough, stepFlythrough, FLYTHROUGH } from "./flythrough.js";
+import { skillLinks, skillNodeIndex } from "./data/skill-links.js";
 
 /**
  * Section ids in document order. js/data/section-moods.js is the single source
@@ -136,16 +138,24 @@ export function createScene(canvas, { tier, reduced = false } = {}) {
     const z = -6 + rng() * 12;
     m.position.set((rng() - 0.5) * 12, (rng() - 0.5) * 7, z);
     m.rotation.z = (rng() - 0.5) * Math.PI;
-    m.userData = { baseX: m.position.x, baseY: m.position.y, spin: (rng() - 0.5) * 0.3, seed: rng() * 6.28, poseScale: 1 };
+    m.userData = { baseX: m.position.x, baseY: m.position.y, spin: (rng() - 0.5) * 0.3, seed: rng() * 6.28, poseScale: 1,
+      // Layered parallax: nearer shards (higher z) drift more than far ones.
+      gain: 0.03 + ((z + 6) / 12) * 0.14 };
     shards.push(m);
     group.add(m);
   }
   anim.push((t, dt) => {
     for (const s of shards) {
+      const g = s.userData.gain || 0;
       if (!reduced) {
         s.position.y = s.userData.baseY + Math.sin(t * 0.5 + s.userData.seed) * 0.18;
         s.rotation.z += s.userData.spin * dt * 0.0003;
       }
+      // Layered parallax on the POSE-derived base x (never the raw baseX, or the
+      // pose spread would be overwritten). Zero under reduced motion.
+      const px0 = s.userData.poseBaseX ?? s.userData.baseX;
+      s.position.x = px0 + (reduced ? 0 : state.pointerX * g);
+      if (!reduced) s.position.y += state.pointerY * g * 0.6;
       // poseScale must still apply under reduced motion (static pose, no drift).
       if (s.userData.poseScale !== undefined) s.scale.setScalar(s.userData.poseScale);
     }
@@ -175,6 +185,7 @@ export function createScene(canvas, { tier, reduced = false } = {}) {
   const constellation = new THREE.Group();
   constellation.position.set(0, 0, -1);
   const cNodes = [];
+  const cDots = []; // the actual meshes — lit by Skill Signal
   const cCount = Math.max(6, Math.min(14, tier.shards + 4));
   for (let i = 0; i < cCount; i++) {
     const p = new THREE.Vector3((rng() - 0.5) * 7, (rng() - 0.5) * 4.4, (rng() - 0.5) * 2.4);
@@ -184,6 +195,8 @@ export function createScene(canvas, { tier, reduced = false } = {}) {
       new THREE.MeshBasicMaterial({ color: PAPER, transparent: true, opacity: 0.8 })
     );
     dot.position.copy(p);
+    dot.userData = { baseOpacity: 0.8, lit: 0 };
+    cDots.push(dot);
     constellation.add(dot);
   }
   // connect nearest neighbours
@@ -410,6 +423,13 @@ export function createScene(canvas, { tier, reduced = false } = {}) {
     // "4 LIFE" four-beat activation progress (0..4 segments lit).
     beatSeq: 0,
     beatTimer: 0,
+    // M6 Camera-through-the-core one-shot (pure state from js/flythrough.js).
+    fly: createFlythrough(),
+    flyFired: false,
+    // Skill Signal: index of the lit constellation node (-1 = none).
+    skillLit: -1,
+    // Tracks the section we came from (M6 fires on hero -> identity-file only).
+    previousSection: SECTION_IDS[0],
   };
 
   /**
@@ -465,6 +485,9 @@ export function createScene(canvas, { tier, reduced = false } = {}) {
       state.targetPose = pose;
       if (reduced) state.currentPose = pose;
     }
+    // M6: fire the one-shot punch-in on the hero -> identity-file step, once.
+    if (state.previousSection === "hero" && id === "identity-file") fireFlythroughOnce();
+    state.previousSection = id;
   }
 
   /**
@@ -496,7 +519,7 @@ export function createScene(canvas, { tier, reduced = false } = {}) {
     });
 
     for (const s of shards) {
-      s.position.x = s.userData.baseX * p.shards.spread;
+      s.userData.poseBaseX = s.userData.baseX * p.shards.spread;
       s.userData.poseScale = p.shards.scale;
     }
 
@@ -538,6 +561,32 @@ export function createScene(canvas, { tier, reduced = false } = {}) {
   /** Release the dock frame back to rest (pointer left / blur). */
   function dockRelease() {
     dock.on = false;
+  }
+
+  /**
+   * Skill Signal: light the constellation node(s) linked to a skill. Nodes are
+   * picked deterministically by hashing the skill label into the node range, so
+   * the same skill always lights the same node without any data coupling.
+   * Passing null/"" clears the highlight. No-op under reduced motion (the CSS
+   * tag emphasis on the skill chip carries the signal instead).
+   * @param {string|null} skill
+   */
+  function setSkillHighlight(skill) {
+    if (reduced) return;
+    // Collision-free index comes from the pure module (regression-tested).
+    state.skillLit = skill ? skillNodeIndex(skill, cDots.length) : -1;
+  }
+
+  /**
+   * M6 "Camera through the core": a ONE-SHOT push-in fired once per session on
+   * the hero -> identity-file transition. Never fires under reduced motion, and
+   * never re-fires (state.flyFired latches). Aborting on scroll is the caller's
+   * job (it simply stops calling); the envelope is self-bounding regardless.
+   */
+  function fireFlythroughOnce() {
+    if (reduced || state.flyFired) return;
+    state.flyFired = true;
+    fireFlythrough(state.fly);
   }
 
   /**
@@ -631,6 +680,16 @@ export function createScene(canvas, { tier, reduced = false } = {}) {
       arc.material.opacity = arc.userData.lit;
     });
 
+    // Skill Signal: ease the lit node brighter + larger, dim the rest. Static
+    // target under reduced motion (setSkillHighlight is a no-op there).
+    cDots.forEach((dot, i) => {
+      const on = i === state.skillLit;
+      dot.userData.lit += ((on ? 1 : 0) - dot.userData.lit) * 0.12;
+      const lit = dot.userData.lit;
+      dot.material.opacity = dot.userData.baseOpacity * (0.35 + 0.65 * (1 - lit)) + lit * 0.9;
+      dot.scale.setScalar(1 + lit * 1.6);
+    });
+
     // Four bold cut-lines sweep the frame on a section change (reduced: never).
     if (cutT >= 0) {
       cutT += dt * 0.0014;
@@ -652,7 +711,10 @@ export function createScene(canvas, { tier, reduced = false } = {}) {
     const py = state.pointerY * 0.28;
     camera.position.x = state.camX + px + sx * SPACE_SHIFT.camPush;
     camera.position.y = state.camY + py + sy * SPACE_SHIFT.camLift;
-    camera.position.z = 6;
+    // M6 flythrough overrides camera z (a bounded dolly toward the core). At rest
+    // the envelope is 0, so z is exactly the normal 6 and nothing else changes.
+    const fly = stepFlythrough(state.fly, dt);
+    camera.position.z = fly.z;
     camera.lookAt(px * 0.35, py * 0.35, 0);
     // Bank the camera into the travel direction. Applied AFTER lookAt (as a
     // local-Z roll) so the orientation solve does not overwrite it.
@@ -669,6 +731,14 @@ export function createScene(canvas, { tier, reduced = false } = {}) {
     }
     core.rotation.y = (core.userData.poseRy || 0) + (state.coreSpinY || 0);
     core.rotation.x = (core.userData.poseRx || 0) + (state.coreSpinX || 0);
+
+    // Core breathing: a gentle idle pulse (orbit-like scale swell) so the core
+    // reads as "alive" between interactions. Frozen under reduced motion.
+    const breath = reduced ? 1 : 1 + Math.sin(t * 0.9) * 0.03;
+    core.scale.setScalar((state.currentPose ? state.currentPose.core.scale : 1) * breath);
+    if (orbitRing) orbitRing.scale.setScalar(
+      (state.currentPose ? state.currentPose.orbitRing.scale : 1) * (reduced ? 1 : 1 + Math.sin(t * 0.9 + 0.6) * 0.02)
+    );
 
     for (const fn of anim) fn(t, dt);
 
@@ -715,7 +785,7 @@ export function createScene(canvas, { tier, reduced = false } = {}) {
   return {
     setActive, setTimelineIndex, resize, start, stop, dispose,
     setBokehEnabled, state, hasBokeh: !!bokeh,
-    dockToRect, dockRelease,
+    dockToRect, dockRelease, setSkillHighlight, fireFlythroughOnce,
   };
 }
 

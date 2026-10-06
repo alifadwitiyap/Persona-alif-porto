@@ -6,6 +6,7 @@ import { profile } from "./data/profile.js";
 import { projects, featuredProject, repoCount } from "./data/projects.js";
 import { experience } from "./data/experience.js";
 import { hallOfFame } from "./data/hall-of-fame.js";
+import { skillLinks, projectsForSkill } from "./data/skill-links.js";
 
 const $ = (sel, root = document) => root.querySelector(sel);
 
@@ -25,7 +26,15 @@ export function renderSkills() {
       (g) => `
       <div class="skills__group">
         <h3>${g.group}</h3>
-        <div class="tags">${g.items.map((i) => `<span class="tag">${i}</span>`).join("")}</div>
+        <div class="tags">${g.items.map((i) => {
+          // Only skills with a real project link get a data-skill hook AND a tab
+          // stop — linking is what makes the chip interactive. Unlinked chips
+          // stay inert text (no dead 25-stop tab order).
+          const linked = skillLinks[i] && skillLinks[i].length;
+          return linked
+            ? `<span class="tag tag--linked" data-skill="${i}" tabindex="0" role="button" aria-label="${i} — highlights related projects">${i}</span>`
+            : `<span class="tag">${i}</span>`;
+        }).join("")}</div>
       </div>`
     )
     .join("");
@@ -310,6 +319,12 @@ export function initUI() {
 
   // Event delegation for project details + modal close
   document.addEventListener("click", (e) => {
+    const skillChip = e.target.closest("[data-skill]");
+    if (skillChip) {
+      const first = projectsForSkill(skillChip.getAttribute("data-skill"))[0];
+      if (first) openModal(first);
+      return;
+    }
     const openBtn = e.target.closest("[data-open]");
     if (openBtn) {
       openModal(openBtn.getAttribute("data-open"));
@@ -319,7 +334,16 @@ export function initUI() {
   });
 
   document.addEventListener("keydown", (e) => {
-    if (e.key === "Escape") closeModal();
+    if (e.key === "Escape") { closeModal(); return; }
+    // Linked skill chips behave like buttons: Enter/Space opens related work.
+    if (e.key === "Enter" || e.key === " ") {
+      const chip = e.target.closest?.("[data-skill]");
+      if (chip) {
+        e.preventDefault();
+        const first = projectsForSkill(chip.getAttribute("data-skill"))[0];
+        if (first) openModal(first);
+      }
+    }
   });
 
   return { repoCount };

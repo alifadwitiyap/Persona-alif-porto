@@ -116,6 +116,10 @@ async function init() {
     // is not mouse-only. dockToRect is a no-op under reduced motion.
     initDocking(world);
 
+    // Skill Signal: hovering/focusing a skill chip lights its linked
+    // constellation node. Keyboard focus is wired the same as hover.
+    initSkillSignal(world);
+
     // Track the experience card in view → light the matching 3D node.
     const tio = new IntersectionObserver(
       () => syncTimelineNode(world),
@@ -173,6 +177,29 @@ function initDocking(world) {
     el.addEventListener("focusout", (e) => {
       // focusout bubbles when focus moves between two children INSIDE the same
       // card — that is not a release, so ignore it unless focus truly left.
+      if (el.contains(e.relatedTarget)) return;
+      focused = false;
+      sync();
+    });
+  });
+}
+
+/**
+ * Skill Signal — light the constellation node linked to the hovered/focused
+ * skill chip. Hover and focus are separate (a mouse-out must not clear a
+ * highlight that keyboard focus still holds). focusout ignores intra-chip moves.
+ */
+function initSkillSignal(world) {
+  if (!world?.setSkillHighlight) return;
+  document.querySelectorAll("[data-skill]").forEach((el) => {
+    const skill = el.getAttribute("data-skill");
+    let hovered = false;
+    let focused = false;
+    const sync = () => world.setSkillHighlight(hovered || focused ? skill : null);
+    el.addEventListener("mouseenter", () => { hovered = true; sync(); }, { passive: true });
+    el.addEventListener("mouseleave", () => { hovered = false; sync(); }, { passive: true });
+    el.addEventListener("focusin", () => { focused = true; sync(); });
+    el.addEventListener("focusout", (e) => {
       if (el.contains(e.relatedTarget)) return;
       focused = false;
       sync();
