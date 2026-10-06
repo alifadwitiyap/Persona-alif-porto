@@ -66,6 +66,11 @@
   .menu-btn { padding: var(--sp-2) var(--sp-3); border-width: 2px; }
   .menu-btn__bars { width: 18px; }
 
+  /* M1: on phones the "CHAPTER NN / MM" text crowds the MENU button. The track
+     stays as a compact read-indicator; only the label text is dropped. */
+  .chapter-progress__meta { display: none; }
+  .chapter-progress { max-width: none; }
+
   /* Hall of Fame: single-column log rows so nothing overflows on phones. */
   .hof-item {
     grid-template-columns: 1fr auto;
