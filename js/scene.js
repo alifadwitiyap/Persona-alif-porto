@@ -34,6 +34,7 @@ import { createShift, fireShift, stepShift, SPACE_SHIFT } from "./camera-shift.j
 import { resolvePose, lerpPose } from "./pose.js";
 import { rectToNdc, ndcToWorld, pickDockZone, isRectVisible } from "./dock.js";
 import { createFlythrough, fireFlythrough, stepFlythrough, FLYTHROUGH } from "./flythrough.js";
+import { skillLinks, skillNodeIndex } from "./data/skill-links.js";
 
 /**
  * Section ids in document order. js/data/section-moods.js is the single source
@@ -572,10 +573,8 @@ export function createScene(canvas, { tier, reduced = false } = {}) {
    */
   function setSkillHighlight(skill) {
     if (reduced) return;
-    if (!skill || !cDots.length) { state.skillLit = -1; return; }
-    let h = 0;
-    for (let i = 0; i < skill.length; i++) h = (h * 31 + skill.charCodeAt(i)) >>> 0;
-    state.skillLit = h % cDots.length;
+    // Collision-free index comes from the pure module (regression-tested).
+    state.skillLit = skill ? skillNodeIndex(skill, cDots.length) : -1;
   }
 
   /**

@@ -16,6 +16,7 @@ const {
   projectSkills,
   projectsForSkill,
   skillsForProject,
+  skillNodeIndex,
 } = await import("../js/data/skill-links.js");
 const { projects } = await import("../js/data/projects.js");
 const { profile } = await import("../js/data/profile.js");
@@ -129,6 +130,29 @@ for (const id of KNOWN_PROJECT_IDS) {
   assert.ok(Array.isArray(got), `skillsForProject("${id}") is never null`);
 }
 
+/* ---------------- 9. skillNodeIndex: collision-free, bounded ------------- */
+// Regression for the bug the reviewer found: a string hash put "Machine
+// Learning" and "RPA Automation" on the SAME node at 8 nodes. The ordinal
+// assignment must keep the linked skills distinct for every plausible count.
+const LINKED = Object.keys(skillLinks).sort();
+for (let n = LINKED.length; n <= 14; n++) {
+  const idx = LINKED.map((s) => skillNodeIndex(s, n));
+  idx.forEach((i) => assert.ok(i >= 0 && i < n, `index ${i} in range for n=${n}`));
+  assert.equal(
+    new Set(idx).size,
+    LINKED.length,
+    `linked skills get DISTINCT nodes at n=${n} (got ${idx})`,
+  );
+}
+// Unknown / degenerate inputs.
+for (const bad of ["CSS", "nope", "", null, undefined]) {
+  assert.equal(skillNodeIndex(bad, 8), -1, `skillNodeIndex(${String(bad)}) -> -1`);
+}
+assert.equal(skillNodeIndex("Python", 0), -1, "nodeCount 0 -> -1");
+assert.equal(skillNodeIndex("Python", -3), -1, "negative nodeCount -> -1");
+// Deterministic: same input, same output.
+assert.equal(skillNodeIndex("Python", 7), skillNodeIndex("Python", 7), "deterministic");
+
 console.log(
-  "PASS — skill-links: verified mapping only, correct inversion, [] on unknown",
+  "PASS — skill-links: verified mapping only, correct inversion, [] on unknown, collision-free node index",
 );

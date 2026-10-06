@@ -55,3 +55,22 @@ export function projectsForSkill(skill) {
 export function skillsForProject(projectId) {
   return projectSkills[projectId] ? [...projectSkills[projectId]] : [];
 }
+
+/**
+ * Deterministic, COLLISION-FREE constellation node index for a skill.
+ *
+ * The linked skills are a tiny fixed set (the keys of `skillLinks`), so each
+ * gets a stable ordinal (sorted order) that is wrapped into the node range.
+ * Ordinals 0..k-1 are distinct whenever `nodeCount >= k`, so two linked skills
+ * can never light the same node — a string hash could collide (measured: a
+ * 31-hash put "Machine Learning" and "RPA Automation" on the same node at 8).
+ *
+ * @param {string} skill
+ * @param {number} nodeCount  number of constellation nodes (>= 1)
+ * @returns {number} index in [0, nodeCount) or -1 when unknown/degenerate
+ */
+export function skillNodeIndex(skill, nodeCount) {
+  if (!(nodeCount > 0)) return -1;
+  const ord = Object.keys(skillLinks).sort().indexOf(skill);
+  return ord < 0 ? -1 : ord % nodeCount;
+}
