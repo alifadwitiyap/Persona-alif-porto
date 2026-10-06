@@ -61,6 +61,101 @@ const BRAND_ACCENT = "#e51e2b";
 const clamp = (value, lo, hi) => Math.min(hi, Math.max(lo, value));
 
 /**
+ * POSES — named spatial compositions for the 3D cluster (interface contract §3).
+ *
+ * DATA ONLY, additive to the mood contract. Each pose is a frozen record of
+ * numeric slots; consumers (scene lane) read `sectionMoods[id].pose` to pick
+ * one and lerp between them. Every leaf is a finite number so a consumer can
+ * interpolate without a type check.
+ *
+ * Slots (all leaves numeric):
+ *   core          { x, y, z, rx, ry, rz, scale, opacity }
+ *   orbitRing     { x, y, z, rx, ry, rz, scale, opacity }
+ *   orbits        { spread, scale, opacity }
+ *   shards        { spread, scale, opacity }
+ *   constellation { x, y, z, scale, opacity }
+ *   timeline      { x, y, z, scale, opacity }
+ *   accentMix     number in [0, 1]
+ *
+ * `standard` reproduces today's NEUTRAL layout verbatim, so an unknown or
+ * missing pose id falls back safely to the current composition.
+ */
+export const POSES = Object.freeze({
+  standard: Object.freeze({
+    core: Object.freeze({ x: 0, y: 0, z: 0, rx: 0, ry: 0, rz: 0, scale: 1, opacity: 1 }),
+    orbitRing: Object.freeze({ x: 2.6, y: 0.4, z: 0.6, rx: 0, ry: 0, rz: 0, scale: 1, opacity: 0.5 }),
+    orbits: Object.freeze({ spread: 1, scale: 1, opacity: 0.38 }),
+    shards: Object.freeze({ spread: 1, scale: 1, opacity: 0.15 }),
+    constellation: Object.freeze({ x: 0, y: 0, z: 0, scale: 1, opacity: 1 }),
+    timeline: Object.freeze({ x: 0, y: 0, z: 0, scale: 1, opacity: 1 }),
+    accentMix: 0.5,
+  }),
+  seal: Object.freeze({
+    core: Object.freeze({ x: 0, y: 0, z: 0, rx: 0, ry: 0, rz: 0, scale: 1.25, opacity: 1 }),
+    orbitRing: Object.freeze({ x: 1.6, y: 0.25, z: 0.35, rx: 0, ry: 0, rz: 0, scale: 0.7, opacity: 0.42 }),
+    orbits: Object.freeze({ spread: 0.6, scale: 0.8, opacity: 0.3 }),
+    shards: Object.freeze({ spread: 0.5, scale: 0.8, opacity: 0.1 }),
+    constellation: Object.freeze({ x: 0, y: 0, z: 0, scale: 0.7, opacity: 0.9 }),
+    timeline: Object.freeze({ x: 0, y: 0, z: 0, scale: 0.7, opacity: 0.9 }),
+    accentMix: 0.72,
+  }),
+  openFrame: Object.freeze({
+    core: Object.freeze({ x: 0, y: 0.1, z: -0.3, rx: 0, ry: 0.15, rz: 0, scale: 1.05, opacity: 1 }),
+    orbitRing: Object.freeze({ x: 3.1, y: 0.5, z: 0.9, rx: 0, ry: 0, rz: 0, scale: 1.15, opacity: 0.55 }),
+    orbits: Object.freeze({ spread: 1.25, scale: 1.1, opacity: 0.42 }),
+    shards: Object.freeze({ spread: 1.15, scale: 1.05, opacity: 0.18 }),
+    constellation: Object.freeze({ x: -0.2, y: 0.1, z: 0, scale: 1.1, opacity: 1 }),
+    timeline: Object.freeze({ x: -0.2, y: 0.1, z: 0, scale: 1.1, opacity: 1 }),
+    accentMix: 0.44,
+  }),
+  podium: Object.freeze({
+    core: Object.freeze({ x: 0, y: 0.25, z: 0, rx: 0, ry: 0, rz: 0, scale: 1.15, opacity: 1 }),
+    orbitRing: Object.freeze({ x: 2.9, y: 0.9, z: 0.7, rx: 0, ry: 0, rz: 0, scale: 1.6, opacity: 0.6 }),
+    orbits: Object.freeze({ spread: 1.1, scale: 1.2, opacity: 0.45 }),
+    shards: Object.freeze({ spread: 1.4, scale: 1.3, opacity: 0.2 }),
+    constellation: Object.freeze({ x: 0, y: 0.3, z: 0, scale: 1.2, opacity: 1 }),
+    timeline: Object.freeze({ x: 0, y: 0.3, z: 0, scale: 1.2, opacity: 1 }),
+    accentMix: 0.58,
+  }),
+  constellationWide: Object.freeze({
+    core: Object.freeze({ x: 0, y: -0.05, z: 0, rx: 0, ry: 0, rz: 0, scale: 0.95, opacity: 1 }),
+    orbitRing: Object.freeze({ x: 2.4, y: 0.35, z: 0.5, rx: 0, ry: 0, rz: 0, scale: 1.05, opacity: 0.48 }),
+    orbits: Object.freeze({ spread: 1.85, scale: 1.25, opacity: 0.5 }),
+    shards: Object.freeze({ spread: 1.6, scale: 1.1, opacity: 0.22 }),
+    constellation: Object.freeze({ x: 0, y: 0, z: 0, scale: 1.5, opacity: 1 }),
+    timeline: Object.freeze({ x: 0, y: 0, z: 0, scale: 0.9, opacity: 0.95 }),
+    accentMix: 0.36,
+  }),
+  railDiagonal: Object.freeze({
+    core: Object.freeze({ x: -0.15, y: 0.05, z: 0, rx: 0, ry: -0.2, rz: 0, scale: 1, opacity: 1 }),
+    orbitRing: Object.freeze({ x: 2.6, y: 0.4, z: 0.6, rx: 0.35, ry: 0, rz: 0.6, scale: 1, opacity: 0.45 }),
+    orbits: Object.freeze({ spread: 1.1, scale: 1, opacity: 0.34 }),
+    shards: Object.freeze({ spread: 1.3, scale: 0.95, opacity: 0.16 }),
+    constellation: Object.freeze({ x: 0.2, y: -0.1, z: 0, scale: 0.95, opacity: 0.9 }),
+    timeline: Object.freeze({ x: -0.4, y: 0.15, z: 0.2, rx: 0, ry: 0.45, rz: 0.35, scale: 1.35, opacity: 1 }),
+    accentMix: 0.62,
+  }),
+  archiveRack: Object.freeze({
+    core: Object.freeze({ x: 0, y: 0, z: -0.4, rx: 0, ry: 0, rz: 0, scale: 0.9, opacity: 1 }),
+    orbitRing: Object.freeze({ x: 3.4, y: 0.2, z: 1.1, rx: 0, ry: 0, rz: 0, scale: 1.3, opacity: 0.4 }),
+    orbits: Object.freeze({ spread: 1.5, scale: 1.15, opacity: 0.36 }),
+    shards: Object.freeze({ spread: 2, scale: 1.4, opacity: 0.24 }),
+    constellation: Object.freeze({ x: 0, y: 0, z: -0.3, scale: 1.15, opacity: 0.95 }),
+    timeline: Object.freeze({ x: 0, y: 0, z: -0.3, scale: 1.15, opacity: 0.95 }),
+    accentMix: 0.28,
+  }),
+  portal: Object.freeze({
+    core: Object.freeze({ x: 0, y: 0, z: 0.3, rx: 0, ry: 0, rz: 0, scale: 1.1, opacity: 1 }),
+    orbitRing: Object.freeze({ x: 1.9, y: 0.3, z: 0.4, rx: 0, ry: 0, rz: 0, scale: 0.85, opacity: 0.52 }),
+    orbits: Object.freeze({ spread: 0.75, scale: 0.9, opacity: 0.4 }),
+    shards: Object.freeze({ spread: 0.35, scale: 0.75, opacity: 0.3 }),
+    constellation: Object.freeze({ x: 0, y: 0, z: 0.2, scale: 0.85, opacity: 1 }),
+    timeline: Object.freeze({ x: 0, y: 0, z: 0.2, scale: 0.85, opacity: 1 }),
+    accentMix: 0.8,
+  }),
+});
+
+/**
  * Documented table. One entry per section id, in document order:
  * hero, identity-file, hall-of-fame, skill-arsenal, mission-log, case-files,
  * open-channel.
@@ -68,6 +163,7 @@ const clamp = (value, lo, hi) => Math.min(hi, Math.max(lo, value));
 export const sectionMoods = {
   hero: {
     order: 0,
+    pose: "seal",
     accent: BRAND_ACCENT,
     progress: { step: 0, label: "START" },
     story: {
@@ -85,6 +181,7 @@ export const sectionMoods = {
   },
   "identity-file": {
     order: 1,
+    pose: "openFrame",
     accent: BRAND_ACCENT,
     progress: { step: 1, label: "IDENTITY FILE" },
     story: {
@@ -100,6 +197,7 @@ export const sectionMoods = {
   },
   "hall-of-fame": {
     order: 2,
+    pose: "podium",
     accent: BRAND_ACCENT,
     progress: { step: 2, label: "HALL OF FAME" },
     story: {
@@ -115,6 +213,7 @@ export const sectionMoods = {
   },
   "skill-arsenal": {
     order: 3,
+    pose: "constellationWide",
     accent: BRAND_ACCENT,
     progress: { step: 3, label: "SKILL ARSENAL" },
     story: {
@@ -130,6 +229,7 @@ export const sectionMoods = {
   },
   "mission-log": {
     order: 4,
+    pose: "railDiagonal",
     accent: BRAND_ACCENT,
     progress: { step: 4, label: "MISSION LOG" },
     story: {
@@ -145,6 +245,7 @@ export const sectionMoods = {
   },
   "case-files": {
     order: 5,
+    pose: "archiveRack",
     accent: BRAND_ACCENT,
     progress: { step: 5, label: "CASE FILES" },
     story: {
@@ -160,6 +261,7 @@ export const sectionMoods = {
   },
   "open-channel": {
     order: 6,
+    pose: "portal",
     accent: BRAND_ACCENT,
     progress: { step: 6, label: "OPEN CHANNEL" },
     story: {

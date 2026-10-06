@@ -26,10 +26,13 @@ import { BokehPass } from "three/addons/postprocessing/BokehPass.js";
 import { OutputPass } from "three/addons/postprocessing/OutputPass.js";
 import {
   sectionMoods,
+  POSES,
   pickAspectPreset,
   resolveSectionScene,
 } from "./data/section-moods.js";
 import { createShift, fireShift, stepShift, SPACE_SHIFT } from "./camera-shift.js";
+import { resolvePose, lerpPose } from "./pose.js";
+import { rectToNdc, ndcToWorld, pickDockZone, isRectVisible } from "./dock.js";
 
 /**
  * Section ids in document order. js/data/section-moods.js is the single source
@@ -117,8 +120,9 @@ export function createScene(canvas, { tier, reduced = false } = {}) {
   orbitRing.position.set(2.6, 0.4, 0.6);
   group.add(orbitRing);
   anim.push((t) => {
-    orbitRing.rotation.z = t * 0.35;
-    orbitRing.position.y = 0.4 + Math.sin(t * 0.7) * 0.08;
+    if (reduced) return; // reduced motion: static pose, no idle drift
+    orbitRing.rotation.z = (orbitRing.userData.poseRz || 0) + t * 0.35;
+    orbitRing.position.y = (orbitRing.userData.poseY ?? 0.4) + Math.sin(t * 0.7) * 0.08;
   });
 
   /* ---------- 3. Angular shards (all sections) ---------- */
@@ -132,14 +136,18 @@ export function createScene(canvas, { tier, reduced = false } = {}) {
     const z = -6 + rng() * 12;
     m.position.set((rng() - 0.5) * 12, (rng() - 0.5) * 7, z);
     m.rotation.z = (rng() - 0.5) * Math.PI;
-    m.userData = { baseY: m.position.y, spin: (rng() - 0.5) * 0.3, seed: rng() * 6.28 };
+    m.userData = { baseX: m.position.x, baseY: m.position.y, spin: (rng() - 0.5) * 0.3, seed: rng() * 6.28, poseScale: 1 };
     shards.push(m);
     group.add(m);
   }
   anim.push((t, dt) => {
     for (const s of shards) {
-      s.position.y = s.userData.baseY + Math.sin(t * 0.5 + s.userData.seed) * 0.18;
-      s.rotation.z += s.userData.spin * dt * 0.0003;
+      if (!reduced) {
+        s.position.y = s.userData.baseY + Math.sin(t * 0.5 + s.userData.seed) * 0.18;
+        s.rotation.z += s.userData.spin * dt * 0.0003;
+      }
+      // poseScale must still apply under reduced motion (static pose, no drift).
+      if (s.userData.poseScale !== undefined) s.scale.setScalar(s.userData.poseScale);
     }
   });
 
@@ -158,7 +166,10 @@ export function createScene(canvas, { tier, reduced = false } = {}) {
     orbits.push(line);
     group.add(line);
   });
-  anim.push((t) => orbits.forEach((l, i) => (l.rotation.z = t * (0.05 + i * 0.02))));
+  anim.push((t) => {
+    if (reduced) return; // reduced motion: no orbit spin
+    orbits.forEach((l, i) => (l.rotation.z = t * (0.05 + i * 0.02)));
+  });
 
   /* ---------- 5. Skill constellation ---------- */
   const constellation = new THREE.Group();
@@ -193,7 +204,7 @@ export function createScene(canvas, { tier, reduced = false } = {}) {
   constellation.visible = false;
   group.add(constellation);
   anim.push((t) => {
-    if (!constellation.visible) return;
+    if (!constellation.visible || reduced) return;
     constellation.rotation.y = t * 0.12;
     constellation.rotation.x = Math.sin(t * 0.2) * 0.08;
   });
@@ -224,8 +235,7 @@ export function createScene(canvas, { tier, reduced = false } = {}) {
   anim.push((t) => {
     if (!timeline3d.visible) return;
     tlNodes.forEach((n, i) => {
-      n.rotation.y = t * 0.8 + i;
-      n.rotation.x = t * 0.5;
+      if (!reduced) { n.rotation.y = t * 0.8 + i; n.rotation.x = t * 0.5; }
       const target = n.userData.lit;
       n.material.opacity += (target - n.material.opacity) * 0.08;
       const s = 1 + n.userData.lit * 0.7;
@@ -320,6 +330,48 @@ export function createScene(canvas, { tier, reduced = false } = {}) {
     anim.push((t) => (points.rotation.y = t * 0.01));
   }
 
+  /* ---------- Project docking frame (one mesh, allocated once) ---------- */
+  // Marks the project card the visitor is reading. Its position is driven by
+  // js/dock.js maths from the card's DOM rect (see dockToRect). Decorative:
+  // aria-hidden in the DOM, and it never carries information the card lacks.
+  const dockFrame = new THREE.Mesh(
+    new THREE.TorusGeometry(0.9, 0.018, 6, 48),
+    new THREE.MeshBasicMaterial({ color: RED, transparent: true, opacity: 0 })
+  );
+  dockFrame.visible = false;
+  group.add(dockFrame);
+  const dock = { x: 0, y: 0, tx: 0, ty: 0, on: false, opacity: 0 };
+  const DOCK_CAM = { fovDeg: 50, dist: 6 };
+  const DOCK_BOUNDS = { xMax: 3.2, yMax: 2.2 };
+
+  /* ---------- "4 LIFE" motif: four-beat activation + four cut-lines ---------- */
+  // Four arc segments ring the core and light one-by-one on load (the "four"
+  // brand beat), then stay lit. On the final section all four are lit — the
+  // "archive finished" state (Final Return Shot reads from this, not a new pose).
+  const beats = [];
+  for (let i = 0; i < 4; i++) {
+    const arc = new THREE.Mesh(
+      new THREE.TorusGeometry(1.75, 0.035, 6, 32, Math.PI / 2.6),
+      new THREE.MeshBasicMaterial({ color: RED, transparent: true, opacity: 0 })
+    );
+    arc.rotation.z = i * (Math.PI / 2) + 0.35;
+    arc.userData = { lit: 0, target: 0 };
+    beats.push(arc);
+    group.add(arc);
+  }
+  // Four dominant cut-lines that sweep the frame on a section change — the
+  // same LineSegments mechanism as the warp burst, just four bold strokes.
+  const CUT_N = 4;
+  const cutGeo = new THREE.BufferGeometry();
+  cutGeo.setAttribute("position", new THREE.BufferAttribute(new Float32Array(CUT_N * 2 * 3), 3));
+  const cutLines = new THREE.LineSegments(
+    cutGeo,
+    new THREE.LineBasicMaterial({ color: PAPER, transparent: true, opacity: 0 })
+  );
+  cutLines.frustumCulled = false;
+  scene.add(cutLines);
+  let cutT = -1;
+
   /* ---------- Post-processing ---------- */
   let composer = null;
   let bokeh = null;
@@ -351,6 +403,13 @@ export function createScene(canvas, { tier, reduced = false } = {}) {
     pointerX: 0, pointerY: 0,
     shift: createShift(),
     running: false,
+    // Pose system (Archive Reconfiguration): ONE active target pose — a section
+    // change REPLACES it, never queues it. currentPose eases toward targetPose.
+    currentPose: resolvePose(sectionMoods[SECTION_IDS[0]], POSES),
+    targetPose: resolvePose(sectionMoods[SECTION_IDS[0]], POSES),
+    // "4 LIFE" four-beat activation progress (0..4 segments lit).
+    beatSeq: 0,
+    beatTimer: 0,
   };
 
   /**
@@ -396,13 +455,89 @@ export function createScene(canvas, { tier, reduced = false } = {}) {
     }
     if (!reduced) {
       warpT = 0; // fire the warp burst
+      cutT = 0;  // fire the four "4 LIFE" cut-lines
       fireShift(state.shift, dx, dy); // bank the camera into the travel direction
     }
+    // Archive Reconfiguration: swap the target pose for this section. Reduced
+    // motion snaps straight to it (no travel); otherwise the loop eases in.
+    const pose = resolvePose(sectionMoods[id], POSES);
+    if (pose) {
+      state.targetPose = pose;
+      if (reduced) state.currentPose = pose;
+    }
+  }
+
+  /**
+   * Write a resolved pose onto the live objects. Pure data -> transforms; the
+   * pose module owns the numbers, this owns only the mapping. Safe under a null
+   * pose (no-op) so a missing pose can never throw inside the render loop.
+   */
+  function applyPose(p) {
+    if (!p) return;
+    core.position.set(p.core.x, p.core.y, p.core.z);
+    core.rotation.set(p.core.rx, p.core.ry, p.core.rz);
+    core.scale.setScalar(p.core.scale);
+    // Idle spin (frame loop) is ADDITIVE on this base, so the pose owns the
+    // resting orientation and the animation owns the drift.
+    core.userData.poseRx = p.core.rx;
+    core.userData.poseRy = p.core.ry;
+
+    orbitRing.position.set(p.orbitRing.x, p.orbitRing.y, p.orbitRing.z);
+    orbitRing.rotation.set(p.orbitRing.rx, p.orbitRing.ry, p.orbitRing.rz);
+    orbitRing.scale.setScalar(p.orbitRing.scale);
+    orbitRing.material.opacity = p.orbitRing.opacity;
+    // Same deal for the ring's float + spin (anim hook adds to these).
+    orbitRing.userData.poseY = p.orbitRing.y;
+    orbitRing.userData.poseRz = p.orbitRing.rz;
+
+    orbits.forEach((line) => {
+      line.scale.setScalar(p.orbits.scale * p.orbits.spread);
+      line.material.opacity = p.orbits.opacity;
+    });
+
+    for (const s of shards) {
+      s.position.x = s.userData.baseX * p.shards.spread;
+      s.userData.poseScale = p.shards.scale;
+    }
+
+    constellation.position.set(p.constellation.x, p.constellation.y, p.constellation.z);
+    constellation.scale.setScalar(p.constellation.scale);
+
+    timeline3d.position.set(p.timeline.x, p.timeline.y, p.timeline.z);
+    timeline3d.rotation.set(0, p.timeline.ry || 0, p.timeline.rz || 0);
+    timeline3d.scale.setScalar(p.timeline.scale);
   }
 
   /** Light the 3D timeline node for the Nth visible experience card. */
   function setTimelineIndex(idx) {
     tlNodes.forEach((n, i) => (n.userData.lit = i === idx ? 1 : 0));
+  }
+
+  /**
+   * Project Docking: aim the frame at a project card's screen rect. Pure maths
+   * from js/dock.js; a rect that is off-screen or degenerate falls back to a
+   * fixed zone for the current aspect, so it never chases a phantom target.
+   * No-op under reduced motion (the CSS card emphasis carries the signal).
+   * @param {{left:number,top:number,width:number,height:number}} rect
+   */
+  function dockToRect(rect) {
+    if (reduced || !rect) return;
+    const vp = { vw: window.innerWidth, vh: window.innerHeight };
+    let world;
+    if (isRectVisible(rect, vp)) {
+      const ndc = rectToNdc(rect, vp);
+      world = ndcToWorld(ndc, { ...DOCK_CAM, aspect: camera.aspect }, DOCK_BOUNDS);
+    } else {
+      world = pickDockZone(aspect);
+    }
+    dock.tx = world.x;
+    dock.ty = world.y;
+    dock.on = true;
+  }
+
+  /** Release the dock frame back to rest (pointer left / blur). */
+  function dockRelease() {
+    dock.on = false;
   }
 
   /**
@@ -462,6 +597,57 @@ export function createScene(canvas, { tier, reduced = false } = {}) {
     const sx = e * state.shift.dx * state.shift.mag;
     const sy = e * state.shift.dy * state.shift.mag;
 
+    // Pose easing (Archive Reconfiguration): ease current -> target, then map
+    // onto the objects. Under reduced motion currentPose is snapped on section
+    // change, so the eased value already equals the target (no travel).
+    state.currentPose = lerpPose(state.currentPose, state.targetPose, reduced ? 1 : 0.06);
+    applyPose(state.currentPose);
+
+    // Project docking frame: ease toward the aimed target, fade in/out. The
+    // ring counter-rotates slowly so it reads as "held", not frozen.
+    dock.x += (dock.tx - dock.x) * 0.12;
+    dock.y += (dock.ty - dock.y) * 0.12;
+    const dockTargetOpacity = dock.on ? 0.75 : 0;
+    dock.opacity += (dockTargetOpacity - dock.opacity) * 0.1;
+    dockFrame.visible = dock.opacity > 0.01;
+    dockFrame.position.x = dock.x;
+    dockFrame.position.y = dock.y;
+    dockFrame.material.opacity = dock.opacity;
+    dockFrame.rotation.z -= dt * 0.0006;
+
+    // "4 LIFE" four-beat activation: light the four segments one-by-one, then
+    // hold. Reduced motion shows all four at once (no sequencing). On the final
+    // section they burn brighter — the "archive finished" Final Return state.
+    if (reduced) {
+      state.beatSeq = 4;
+    } else if (state.beatSeq < 4) {
+      state.beatTimer += dt;
+      if (state.beatTimer > 260) { state.beatSeq += 1; state.beatTimer = 0; }
+    }
+    const isFinal = state.active === SECTION_IDS[SECTION_IDS.length - 1];
+    beats.forEach((arc, i) => {
+      const target = i < state.beatSeq ? (isFinal ? 0.9 : 0.55) : 0;
+      arc.userData.lit += (target - arc.userData.lit) * 0.1;
+      arc.material.opacity = arc.userData.lit;
+    });
+
+    // Four bold cut-lines sweep the frame on a section change (reduced: never).
+    if (cutT >= 0) {
+      cutT += dt * 0.0014;
+      if (cutT >= 1) { cutT = -1; cutLines.material.opacity = 0; }
+      else {
+        cutLines.material.opacity = Math.sin(cutT * Math.PI) * 0.35;
+        const pos = cutGeo.attributes.position.array;
+        for (let i = 0; i < CUT_N; i++) {
+          const y = -3 + i * 2;
+          const spread = 0.6 + cutT * 5.4;
+          pos[i * 6 + 0] = -6;              pos[i * 6 + 1] = y;                 pos[i * 6 + 2] = 0;
+          pos[i * 6 + 3] = -6 + spread;     pos[i * 6 + 4] = y + spread * 0.22; pos[i * 6 + 5] = 0;
+        }
+        cutGeo.attributes.position.needsUpdate = true;
+      }
+    }
+
     const px = state.pointerX * 0.5;
     const py = state.pointerY * 0.28;
     camera.position.x = state.camX + px + sx * SPACE_SHIFT.camPush;
@@ -475,8 +661,14 @@ export function createScene(canvas, { tier, reduced = false } = {}) {
     group.rotation.y = Math.sin(t * 0.12) * 0.12 + px * 0.12 - sx * SPACE_SHIFT.groupYaw;
     group.rotation.x = Math.sin(t * 0.09) * 0.06 - py * 0.08 + sy * SPACE_SHIFT.groupYaw * 0.5;
 
-    core.rotation.y += dt * 0.00022;
-    core.rotation.x += dt * 0.00013;
+    // Core idle spin, ADDITIVE on the pose's resting orientation (a bare `+=`
+    // here would be overwritten by applyPose() every frame and never drift).
+    if (!reduced) {
+      state.coreSpinY = (state.coreSpinY || 0) + dt * 0.00022;
+      state.coreSpinX = (state.coreSpinX || 0) + dt * 0.00013;
+    }
+    core.rotation.y = (core.userData.poseRy || 0) + (state.coreSpinY || 0);
+    core.rotation.x = (core.userData.poseRx || 0) + (state.coreSpinX || 0);
 
     for (const fn of anim) fn(t, dt);
 
@@ -523,6 +715,7 @@ export function createScene(canvas, { tier, reduced = false } = {}) {
   return {
     setActive, setTimelineIndex, resize, start, stop, dispose,
     setBokehEnabled, state, hasBokeh: !!bokeh,
+    dockToRect, dockRelease,
   };
 }
 
