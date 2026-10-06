@@ -11,7 +11,9 @@
   /* keep the headline first; the portrait follows. The name must never be
      pushed below the fold by the image. */
   .portrait { margin: 0 auto; max-width: 340px; }
-  .spotlight { grid-template-columns: 1fr; }
+  /* minmax(0,1fr), not 1fr: a 1fr track has a min-content floor, so a long
+     unbreakable title would blow the column past the card. */
+  .spotlight { grid-template-columns: minmax(0, 1fr); }
   /* Identity card: stack the bio above the quick-facts list, and turn the
      vertical divider into a horizontal one so the single box still reads. */
   .identity-card { grid-template-columns: 1fr; }
