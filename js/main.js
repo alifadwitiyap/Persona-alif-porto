@@ -111,6 +111,11 @@ async function init() {
 
     world.start();
 
+    // Project Docking: hover/focus on a project card aims the 3D dock frame at
+    // it. Keyboard focus is wired identically (focusin/focusout) so the effect
+    // is not mouse-only. dockToRect is a no-op under reduced motion.
+    initDocking(world);
+
     // Track the experience card in view → light the matching 3D node.
     const tio = new IntersectionObserver(
       () => syncTimelineNode(world),
@@ -142,6 +147,37 @@ async function init() {
     console.warn("[scene] WebGL disabled:", err);
     stage?.setAttribute("data-webgl", "off");
   }
+}
+
+/**
+ * Project Docking — aim the 3D dock frame at the hovered/focused project card.
+ * Keyboard focus (focusin) is wired the same as pointer hover, so the effect is
+ * available without a mouse. Mouse-only affordances (mouseenter) are paired with
+ * focusin; both release on the matching out-event.
+ */
+function initDocking(world) {
+  if (!world?.dockToRect) return;
+  const cards = document.querySelectorAll("[data-project], .spotlight");
+  cards.forEach((el) => {
+    // Hover and focus are tracked SEPARATELY: releasing on the mouse-out event
+    // must not drop a dock that keyboard focus still holds (and vice-versa).
+    let hovered = false;
+    let focused = false;
+    const sync = () => {
+      if (hovered || focused) world.dockToRect(el.getBoundingClientRect());
+      else world.dockRelease();
+    };
+    el.addEventListener("mouseenter", () => { hovered = true; sync(); }, { passive: true });
+    el.addEventListener("mouseleave", () => { hovered = false; sync(); }, { passive: true });
+    el.addEventListener("focusin", () => { focused = true; sync(); });
+    el.addEventListener("focusout", (e) => {
+      // focusout bubbles when focus moves between two children INSIDE the same
+      // card — that is not a release, so ignore it unless focus truly left.
+      if (el.contains(e.relatedTarget)) return;
+      focused = false;
+      sync();
+    });
+  });
 }
 
 /**
