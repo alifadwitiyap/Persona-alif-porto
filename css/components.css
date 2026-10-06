@@ -286,13 +286,21 @@
 }
 /* Spotlight: the PROJECT is the hero, not its star count. The name carries the
    display size; the GitHub-stars metric is demoted to a compact meta chip so a
-   weak number can never out-shout the work. */
+   weak number can never out-shout the work.
+   The title is a single long word ("NDETCStemmer"), so it needs BOTH a size that
+   fits the narrow grid column at every breakpoint AND a wrap fallback — at
+   --step-4 the word rendered 1026px wide inside a 670px column and the card's
+   clip-path sliced it. */
 .spotlight h3 {
   font-family: var(--font-hero);
-  font-size: var(--step-4);
+  font-size: clamp(1.5rem, 1.0rem + 2.4vw, 3.5rem); /* 24 → 56px, one line per column */
   line-height: 0.95;
   margin-bottom: var(--sp-3);
   text-shadow: 5px 5px 0 #000, 8px 8px 0 var(--accent);
+  min-width: 0;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  hyphens: auto;
 }
 .spotlight__metric {
   display: inline-flex;
