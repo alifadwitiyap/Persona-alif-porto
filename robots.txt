@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://alifadwitiyap.github.io/Persona-alif-porto/sitemap.xml

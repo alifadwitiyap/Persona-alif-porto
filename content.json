@@ -1,0 +1,614 @@
+{
+  "_comment": "MASTER CONTENT FILE — edit file ini, semua isi website ikut berubah. Tidak perlu sentuh HTML/JS untuk ganti teks, link, project, atau pengalaman.",
+  "site": {
+    "title": "4 LIFE — Alif Adwitiya Pratama",
+    "description": "Portfolio of Alif Adwitiya Pratama. Built 4 Life — from real life needs to real life solutions."
+  },
+  "_comment_sections": "Urutan key = urutan section di halaman. `scene` mengatur kamera 3D (focus/camX/camY/layout/motion + preset per rasio layar). `title` = judul besar, `index` = label kecil, `menu` = overlay chapter, `progress` = bar atas, `story` = microcopy naratif.",
+  "sections": {
+    "hero": {
+      "name": "Start",
+      "accent": "#e51e2b",
+      "progress": {
+        "step": 0,
+        "label": "START"
+      },
+      "story": {
+        "act": "SIGNAL",
+        "beat": "A signal enters the system."
+      },
+      "menu": {
+        "index": "00",
+        "label": "START",
+        "hud": "Start"
+      },
+      "scene": {
+        "focus": 0.9,
+        "camX": 0,
+        "camY": 0.2,
+        "layout": "archiveCore",
+        "motion": "orbit"
+      },
+      "presets": {
+        "portrait": {
+          "focus": 1.05,
+          "camX": 0,
+          "camY": 0.5
+        },
+        "wide": {
+          "focus": 0.9,
+          "camX": 0,
+          "camY": 0.2
+        }
+      }
+    },
+    "identity-file": {
+      "title": "Profile",
+      "index": "01 / IDENTITY FILE",
+      "name": "Identity File",
+      "accent": "#e51e2b",
+      "progress": {
+        "step": 1,
+        "label": "IDENTITY FILE"
+      },
+      "story": {
+        "act": "IDENTIFY",
+        "beat": "The person behind the model."
+      },
+      "menu": {
+        "index": "01",
+        "label": "IDENTITY FILE",
+        "hud": "Identity File"
+      },
+      "scene": {
+        "focus": 1.5,
+        "camX": -0.7,
+        "camY": 0.1,
+        "layout": "portraitFrame",
+        "motion": "orbit"
+      },
+      "presets": {
+        "portrait": {
+          "focus": 1.7,
+          "camX": -0.25,
+          "camY": 0.35
+        },
+        "wide": {
+          "focus": 1.4,
+          "camX": -0.9,
+          "camY": 0.1
+        }
+      }
+    },
+    "hall-of-fame": {
+      "title": "Hall of Fame",
+      "index": "02 / HALL OF FAME",
+      "name": "Hall of Fame",
+      "accent": "#e51e2b",
+      "progress": {
+        "step": 2,
+        "label": "HALL OF FAME"
+      },
+      "story": {
+        "act": "PROVE",
+        "beat": "Signals become evidence."
+      },
+      "menu": {
+        "index": "02",
+        "label": "HALL OF FAME",
+        "hud": "Hall of Fame"
+      },
+      "scene": {
+        "focus": 1.75,
+        "camX": 0.5,
+        "camY": 0.05,
+        "layout": "shardField",
+        "motion": "rise"
+      },
+      "presets": {
+        "portrait": {
+          "focus": 1.95,
+          "camX": 0.25,
+          "camY": 0.3
+        },
+        "wide": {
+          "focus": 1.65,
+          "camX": 0.6,
+          "camY": 0.05
+        }
+      }
+    },
+    "skill-arsenal": {
+      "title": "Skills",
+      "index": "03 / SKILL ARSENAL",
+      "name": "Skill Arsenal",
+      "accent": "#e51e2b",
+      "progress": {
+        "step": 3,
+        "label": "SKILL ARSENAL"
+      },
+      "story": {
+        "act": "ARM",
+        "beat": "Tools are only useful in motion."
+      },
+      "menu": {
+        "index": "03",
+        "label": "SKILL ARSENAL",
+        "hud": "Skill Arsenal"
+      },
+      "scene": {
+        "focus": 2,
+        "camX": 0.6,
+        "camY": -0.1,
+        "layout": "constellation",
+        "motion": "pulse"
+      },
+      "presets": {
+        "portrait": {
+          "focus": 2.2,
+          "camX": 0.3,
+          "camY": 0.15
+        },
+        "wide": {
+          "focus": 1.9,
+          "camX": 0.75,
+          "camY": -0.1
+        }
+      }
+    },
+    "mission-log": {
+      "title": "Experience",
+      "index": "04 / MISSION LOG",
+      "name": "Mission Log",
+      "accent": "#e51e2b",
+      "progress": {
+        "step": 4,
+        "label": "MISSION LOG"
+      },
+      "story": {
+        "act": "MOVE",
+        "beat": "Every role leaves a trace."
+      },
+      "menu": {
+        "index": "04",
+        "label": "MISSION LOG",
+        "hud": "Mission Log"
+      },
+      "scene": {
+        "focus": 2.6,
+        "camX": -0.5,
+        "camY": 0.15,
+        "layout": "timelineRail",
+        "motion": "rise"
+      },
+      "presets": {
+        "portrait": {
+          "focus": 2.8,
+          "camX": -0.2,
+          "camY": 0.3
+        },
+        "wide": {
+          "focus": 2.5,
+          "camX": -0.65,
+          "camY": 0.15
+        }
+      }
+    },
+    "case-files": {
+      "title": "Projects",
+      "index": "05 / CASE FILES",
+      "name": "Case Files",
+      "accent": "#e51e2b",
+      "progress": {
+        "step": 5,
+        "label": "CASE FILES"
+      },
+      "story": {
+        "act": "DEPLOY",
+        "beat": "Evidence, not decoration."
+      },
+      "menu": {
+        "index": "05",
+        "label": "CASE FILES",
+        "hud": "Case Files"
+      },
+      "scene": {
+        "focus": 3.1,
+        "camX": 0.5,
+        "camY": 0,
+        "layout": "shardField",
+        "motion": "parallax"
+      },
+      "presets": {
+        "portrait": {
+          "focus": 3.3,
+          "camX": 0.25,
+          "camY": 0.1
+        },
+        "wide": {
+          "focus": 3,
+          "camX": 0.6,
+          "camY": 0
+        }
+      }
+    },
+    "open-channel": {
+      "title": "Let's talk",
+      "index": "06 / OPEN CHANNEL",
+      "name": "Open Channel",
+      "accent": "#e51e2b",
+      "progress": {
+        "step": 6,
+        "label": "OPEN CHANNEL"
+      },
+      "story": {
+        "act": "CONTINUE",
+        "beat": "The next signal needs a receiver."
+      },
+      "menu": {
+        "index": "06",
+        "label": "OPEN CHANNEL",
+        "hud": "Open Channel"
+      },
+      "scene": {
+        "focus": 3.6,
+        "camX": 0,
+        "camY": 0.2,
+        "layout": "archiveCore",
+        "motion": "settle"
+      },
+      "presets": {
+        "portrait": {
+          "focus": 3.8,
+          "camX": 0.15,
+          "camY": 0.4
+        },
+        "wide": {
+          "focus": 3.5,
+          "camX": 0,
+          "camY": 0.2
+        }
+      }
+    }
+  },
+  "hero": {
+    "kicker": "Portfolio // Archive Access",
+    "name_line1": "Alif Adwitiya",
+    "name_line2": "Pratama",
+    "role": "Collection Systems · Data & Applied AI",
+    "tagline": "Built 4 Life[♥] — From real life needs to real life solutions.",
+    "cta_label": "View selected work",
+    "cta_href": "#case-files",
+    "portrait_tag": "OPERATOR // ONLINE"
+  },
+  "profile": {
+    "name": "Alif Adwitiya Pratama",
+    "handle": "alifadwitiyap",
+    "role": "Assistant Manager — Collection System & Data Analyst",
+    "headline": "Assistant Manager at Bank Mandiri · Collection System & Data Analyst · AI & Data",
+    "tagline": "Built 4 Life[♥] — From real life needs to real life solutions.",
+    "location": "Jakarta, ID",
+    "links": {
+      "github": "https://github.com/alifadwitiyap",
+      "linkedin": "https://www.linkedin.com/in/alifadwitiyap/",
+      "email": "alifadwitiyap@gmail.com"
+    },
+    "about": [
+      "Assistant Manager at Bank Mandiri, joining through the Officer Development Program (ODP). I help collection operations become more reliable, efficient, and data-informed by connecting business needs, systems delivery, analytics, and process automation.",
+      "I work at the intersection of business operations, data analytics, IT support, and system improvement. My role involves collaborating with users and IT teams to understand operational needs, translate them into system requirements, improve process reliability, and support data-driven decision-making in collection operations.",
+      "Along the way, I graduated cum laude in Informatics from Telkom University with a GPA of 3.90/4.00 and was a Google Bangkit Academy 2022 Distinction Graduate (top 10% of graduates). I was 1st Winner in the Data Analysis Competition IFest UNPAD 2022 and the Data Competition ISFEST UMN 2021, and a finalist in Statistics In Action 2021, published an open-source Python package (NDETCStemmer) on PyPI and contributed to a Bangkit capstone recommender system selected among the top 53 of 433 projects.",
+      "I'm particularly interested in AI, especially agentic tools for process automation, and I enjoy exploring ways to build more efficient and intelligent solutions."
+    ],
+    "focus_tags": [
+      "Jakarta, ID",
+      "AI & Data",
+      "Leadership"
+    ],
+    "skills": [
+      {
+        "group": "Core",
+        "items": [
+          "Machine Learning",
+          "SQL",
+          "Python",
+          "Data Visualization",
+          "Statistics"
+        ]
+      },
+      {
+        "group": "Data & Cloud",
+        "items": [
+          "Data Engineering",
+          "Data Warehousing",
+          "BigQuery",
+          "Apache Spark",
+          "GCP",
+          "Microsoft Fabric",
+          "Talend"
+        ]
+      },
+      {
+        "group": "Engineering",
+        "items": [
+          "Back-end Development",
+          "REST API",
+          "Cloud Computing",
+          "Java",
+          "Kotlin"
+        ]
+      },
+      {
+        "group": "Applied AI",
+        "items": [
+          "Agentic AI"
+        ]
+      },
+      {
+        "group": "Domain",
+        "items": [
+          "Banking",
+          "Risk Management",
+          "RPA Automation",
+          "System Analysis"
+        ]
+      }
+    ],
+    "quick_facts": [
+      {
+        "value": "2+",
+        "label": "years at Bank Mandiri"
+      },
+      {
+        "value": "16",
+        "label": "people led in a technical team"
+      },
+      {
+        "value": "AI & Data",
+        "label": "business + analytics + systems delivery"
+      }
+    ]
+  },
+  "experience": [
+    {
+      "id": "mandiri",
+      "org": "PT Bank Mandiri (Persero) Tbk.",
+      "role": "Assistant Manager — Collection System & Data Analyst",
+      "period": "Mar 2025 — Present",
+      "place": "On-site · Jakarta",
+      "kind": "Full-time",
+      "accent": "#e51e2b",
+      "points": [
+        "Translate collection-process needs from business users, operations and IT into technical specifications and system improvements.",
+        "Lead and support collection system projects: testing, go-live coordination, post-implementation review.",
+        "Use data analytics to find performance trends and optimise collection workflows.",
+        "Drive automation of repetitive work through RPA for higher efficiency and accuracy.",
+        "Lead a 16-member technical team: set priorities, delegate, and keep service quality high."
+      ],
+      "tags": [
+        "Data Analytics",
+        "RPA",
+        "System Analysis",
+        "Team Lead"
+      ]
+    },
+    {
+      "id": "mandiri-odp",
+      "org": "PT Bank Mandiri (Persero) Tbk.",
+      "role": "Officer Development Program — Risk Management",
+      "period": "Sep 2024 — Mar 2025",
+      "place": "On-site · Jakarta",
+      "kind": "Graduate program",
+      "accent": "#ff3344",
+      "points": [
+        "Rotational development program across risk management functions.",
+        "Built the foundation for the current collection-system and analytics role."
+      ],
+      "tags": [
+        "Risk Management",
+        "Banking"
+      ]
+    },
+    {
+      "id": "bangkit",
+      "org": "Bangkit Academy 2022 — Google, GoTo & Traveloka",
+      "role": "Machine Learning Path — Distinction Graduate",
+      "period": "2022",
+      "place": "Remote",
+      "kind": "Apprenticeship",
+      "accent": "#22e0f5",
+      "points": [
+        "Graduated with Distinction, in the top 10% of the cohort.",
+        "Built a recommender system selected as one of the TOP 53 projects out of 433."
+      ],
+      "tags": [
+        "Machine Learning",
+        "Recommender",
+        "Distinction",
+        "TOP 53"
+      ]
+    }
+  ],
+  "experience_more_label": "See more on LinkedIn",
+  "hallOfFame": {
+    "deck": "The receipts are in.",
+    "academic": {
+      "label": "Graduate",
+      "degree": "Bachelor of Informatics",
+      "school": "Telkom University",
+      "period": "2019 — 2023",
+      "gpa": "3.90",
+      "scale": "4.00",
+      "thesis": "Balinese Script Handwriting Recognition Using Faster R-CNN"
+    },
+    "awards": [
+      {
+        "rank": "Cum Laude",
+        "title": "Bachelor of Informatics",
+        "organizer": "Telkom University",
+        "year": "2023"
+      },
+      {
+        "rank": "Distinction",
+        "title": "Bangkit Academy 2022 — Machine Learning Path",
+        "organizer": "Google, GoTo & Traveloka",
+        "year": "2022"
+      },
+      {
+        "rank": "Top 53",
+        "title": "Bangkit Capstone Recommender System",
+        "organizer": "Top 53 of 433 projects",
+        "year": "2022"
+      },
+      {
+        "rank": "1st Place",
+        "title": "Data Analysis Competition",
+        "organizer": "IFest UNPAD",
+        "year": "2022"
+      },
+      {
+        "rank": "1st Place",
+        "title": "Data Competition",
+        "organizer": "ISFEST UMN",
+        "year": "2021"
+      },
+      {
+        "rank": "Finalist",
+        "title": "Statistics in Action",
+        "organizer": "Universitas Islam Indonesia",
+        "year": "2021"
+      },
+      {
+        "rank": "Awardee",
+        "title": "Kaltim Tuntas Scholarship",
+        "organizer": "East Kalimantan Provincial Government",
+        "year": "2020"
+      }
+    ],
+    "publications": [
+      {
+        "title": "Study on the Dynamics of COVID-19 Cases in Achieving Herd Immunity in Indonesia",
+        "venue": "IEEE ICICyTA 2021",
+        "badge": "IEEE",
+        "year": "2021",
+        "url": "https://doi.org/10.1109/ICICyTA53712.2021.9689122"
+      },
+      {
+        "title": "Balinese Script Handwriting Recognition Using Faster R-CNN",
+        "venue": "Jurnal RESTI, Vol 7 No 6",
+        "badge": "Sinta 2",
+        "year": "2023",
+        "url": "https://doi.org/10.29207/resti.v7i6.5176"
+      }
+    ]
+  },
+  "projects": [
+    {
+      "id": "ndetcstemmer",
+      "name": "NDETCStemmer",
+      "featured": true,
+      "lang": "Python",
+      "stars": 13,
+      "year": "2022",
+      "topics": [
+        "indonesian-language",
+        "nlp-library",
+        "nlp-stemming"
+      ],
+      "desc": "Library implementing a nondeterministic, context-based stemming method for ambiguous Indonesian words (words with more than one morphological meaning).",
+      "url": "https://github.com/alifadwitiyap/NDETCStemmer",
+      "caseFile": {
+        "problem": "Indonesian stemming breaks down on ambiguous words — words with more than one morphological meaning, where a single deterministic rule produces the wrong root.",
+        "role": "Creator and maintainer of the library and its published package.",
+        "approach": "A nondeterministic, context-based stemming method that keeps the candidate readings of an ambiguous word and resolves them from context, packaged as a reusable Python library and published on PyPI.",
+        "why": "Reliable text normalisation is the unglamorous foundation of every downstream Indonesian NLP task.",
+        "proof": [
+          {
+            "label": "Repository",
+            "url": "https://github.com/alifadwitiyap/NDETCStemmer"
+          }
+        ],
+        "outcome": ""
+      }
+    },
+    {
+      "id": "unword",
+      "name": "unword",
+      "featured": false,
+      "lang": "CSS",
+      "stars": 0,
+      "year": "2026",
+      "topics": [
+        "web",
+        "tool"
+      ],
+      "desc": "A tiny web app that breaks a long password or string into vertical per-character output.",
+      "url": "https://github.com/alifadwitiyap/unword",
+      "caseFile": {
+        "problem": "Long passwords and strings are hard to read back and verify character by character in a normal horizontal layout.",
+        "role": "Creator — concept, implementation, and styling.",
+        "approach": "A minimal, dependency-free web app that reflows any input string into vertical per-character output so each character can be checked at a glance.",
+        "why": "A small, sharp utility that solves one real annoyance completely — the kind of tool you reach for once and keep.",
+        "proof": [
+          {
+            "label": "Repository",
+            "url": "https://github.com/alifadwitiyap/unword"
+          }
+        ],
+        "outcome": ""
+      }
+    },
+    {
+      "id": "wa-bulk",
+      "name": "WA-Bulk",
+      "featured": false,
+      "lang": "Python",
+      "stars": 0,
+      "year": "2026",
+      "topics": [
+        "streamlit",
+        "openwa",
+        "sqlite"
+      ],
+      "desc": "Personal WhatsApp bulk sender: scheduled or ad-hoc broadcasts with a monitoring dashboard and a responsible-sending guard (rate limits, jitter, cooldown). Streamlit + OpenWA + SQLite.",
+      "url": "https://github.com/alifadwitiyap/WA-Bulk",
+      "caseFile": {
+        "problem": "Sending the same message to many contacts by hand is slow and easy to get wrong, while naive bulk senders risk flooding recipients.",
+        "role": "Creator — architecture, sending engine, and guard design.",
+        "approach": "A Streamlit app over an OpenWA + SQLite stack: scheduled or ad-hoc broadcasts, a monitoring dashboard, and a responsible-sending guard built from rate limits, send jitter, and cooldown windows.",
+        "why": "Automating a repetitive communication task — with guardrails that keep it responsible instead of spammy.",
+        "proof": [
+          {
+            "label": "Repository",
+            "url": "https://github.com/alifadwitiyap/WA-Bulk"
+          }
+        ],
+        "outcome": ""
+      }
+    }
+  ],
+  "case_files_note": "Only my pinned repositories are shown here. See everything on",
+  "case_files_disclosure": "Selected descriptions are intentionally generalized to respect confidentiality.",
+  "contact": {
+    "big_text": "EVERY PROBLEM HIDES A TREASURE.<br />Let's uncover yours",
+    "links": [
+      {
+        "label": "LinkedIn",
+        "url": "https://www.linkedin.com/in/alifadwitiyap/",
+        "primary": true
+      },
+      {
+        "label": "GitHub",
+        "url": "https://github.com/alifadwitiyap",
+        "primary": false
+      },
+      {
+        "label": "Email",
+        "url": "mailto:alifadwitiyap@gmail.com",
+        "primary": false
+      }
+    ]
+  },
+  "footer": {
+    "tagline": "Built 4 Life[♥] — From real life needs to real life solutions."
+  }
+}

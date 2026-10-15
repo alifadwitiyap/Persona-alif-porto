@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en" data-section="hero">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>4 LIFE — Alif Adwitiya Pratama</title>
+  <meta name="description" content="Portfolio of Alif Adwitiya Pratama. Built 4 Life — from real life needs to real life solutions." />
+  <meta name="color-scheme" content="dark" />
+
+  <!-- Progressive enhancement: reveal/swipe start hidden and are opened by JS.
+       With JS off (or a failed bootstrap) everything must stay readable — this
+       noscript block is the safety net both reviewers asked for. -->
+  <noscript>
+    <style>
+      .reveal, .reveal--stagger > *, .reveal--editorial, .reveal--editorial > *,
+      .intro { display: revert; opacity: 1 !important; transform: none !important; clip-path: none !important; }
+      /* Section titles are visually hidden by design (not by JS), so nothing
+         to restore here — they stay available to assistive tech. */
+    </style>
+  </noscript>
+
+  <!-- Canonical + social sharing (absolute URLs: GitHub Pages project base path) -->
+  <link rel="canonical" href="https://alifadwitiyap.github.io/Persona-alif-porto/" />
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="4 LIFE — Alif Adwitiya Pratama" />
+  <meta property="og:title" content="Alif Adwitiya Pratama — Collection Systems, Data &amp; Applied AI" />
+  <meta property="og:description" content="Selected work in collection systems, data analytics, automation, and applied AI." />
+  <meta property="og:url" content="https://alifadwitiyap.github.io/Persona-alif-porto/" />
+  <meta property="og:image" content="https://alifadwitiyap.github.io/Persona-alif-porto/assets/images/og-cover.jpg" />
+  <meta property="og:image:alt" content="4 LIFE — portfolio cover for Alif Adwitiya Pratama" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta property="og:image:type" content="image/jpeg" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Alif Adwitiya Pratama — Collection Systems, Data &amp; Applied AI" />
+  <meta name="twitter:description" content="Selected work in collection systems, data analytics, automation, and applied AI." />
+  <meta name="twitter:image" content="https://alifadwitiyap.github.io/Persona-alif-porto/assets/images/og-cover.jpg" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23070709'/%3E%3Ctext x='16' y='24' font-family='Arial Black,sans-serif' font-size='18' font-style='italic' font-weight='900' fill='%23e51e2b' text-anchor='middle'%3E4L%3C/text%3E%3C/svg%3E" />
+
+  <link rel="stylesheet" href="./css/fonts.css" />
+  <link rel="stylesheet" href="./css/variables.css" />
+  <link rel="stylesheet" href="./css/base.css" />
+  <link rel="stylesheet" href="./css/layout.css" />
+  <link rel="stylesheet" href="./css/components.css" />
+  <link rel="stylesheet" href="./css/animations.css" />
+  <link rel="stylesheet" href="./css/overlays.css" />
+  <link rel="stylesheet" href="./css/responsive.css" />
+
+  <!-- Import map: resolves bare 'three' used by the vendored r169 addons -->
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "./vendor/three.module.js",
+      "three/addons/": "./vendor/addons/"
+    }
+  }
+  </script>
+</head>
+<body>
+  <a class="skip-link" href="#hero">Skip to content</a>
+
+  <!-- Decorative WebGL stage (aria-hidden, never the source of content) -->
+  <div class="stage" aria-hidden="true" data-webgl="pending">
+    <canvas id="gl"></canvas>
+  </div>
+
+  <!-- ---------- Top bar: brand + progress bar + menu trigger (v3) ---------- -->
+  <header class="topbar">
+    <a class="brand" href="#hero" aria-label="4 LIFE — home">
+      <span class="dot" aria-hidden="true"></span> <span class="brand__4life">4<span class="brand__heart">♥</span>LIFE</span>
+    </a>
+
+    <!-- Chapter progress: a read indicator, not a control. JS sets
+         --progress (0..1) and the label from portfolio:sectionchange. -->
+    <div class="chapter-progress" id="chapter-progress"
+         role="status" aria-live="polite" aria-atomic="true">
+      <span class="chapter-progress__meta" id="chapter-progress-label">CHAPTER 00 / 06</span>
+      <span class="chapter-progress__track" aria-hidden="true">
+        <span class="chapter-progress__fill" id="chapter-progress-fill"></span>
+        <span class="chapter-progress__ticks" id="chapter-progress-ticks"></span>
+      </span>
+    </div>
+
+    <button class="menu-btn" id="menu-btn" type="button"
+            aria-haspopup="dialog" aria-controls="chapter-menu" aria-expanded="false">
+      <span class="menu-btn__bars" aria-hidden="true"></span>
+      <span class="menu-btn__label">Menu</span>
+      <kbd class="menu-btn__kbd" aria-hidden="true">M</kbd>
+    </button>
+
+    <noscript>
+      <nav class="nav nav--fallback" aria-label="Sections">
+        <a href="#identity-file">Identity File</a>
+        <a href="#hall-of-fame">Hall of Fame</a>
+        <a href="#skill-arsenal">Skill Arsenal</a>
+        <a href="#mission-log">Mission Log</a>
+        <a href="#case-files">Case Files</a>
+        <a href="#open-channel">Open Channel</a>
+      </nav>
+    </noscript>
+  </header>
+
+  <main class="shell" id="main">
+
+    <!-- ============ 01 HERO (sticky portrait) ============ -->
+    <section class="section hero" id="hero" data-name="Start" aria-labelledby="hero-title">
+      <div class="section__inner hero__grid">
+        <div class="hero__copy">
+          <p class="hero__kicker" id="hero-kicker">Portfolio // Archive Access</p>
+          <h1 class="hero__name" id="hero-title">
+            <span class="line1" id="hero-name-1">Alif Adwitiya</span>
+            <span class="line2" id="hero-name-2">Pratama</span>
+          </h1>
+          <!-- Role line: the concrete specialization, so a recruiter knows WHAT
+               this person does before reading the brand tagline. Copy mirrors
+               og:title and content.json (no invented claims). -->
+          <p class="hero__role" id="hero-role">Collection Systems &middot; Data &amp; Applied AI</p>
+          <p class="hero__tagline" id="hero-tagline">Built 4 Life[♥] — From real life needs to real life solutions.</p>
+          <div class="hero__actions">
+            <a class="btn btn--primary hero__cta" id="hero-cta" href="#case-files">View selected work</a>
+            <a class="btn" id="hero-gh" href="https://github.com/alifadwitiyap" rel="noopener" target="_blank">GitHub</a>
+            <a class="btn" id="hero-li" href="https://www.linkedin.com/in/alifadwitiyap/" rel="noopener" target="_blank">LinkedIn</a>
+          </div>
+        </div>
+
+        <!-- Sticky portrait: stays on screen while scrolling, then morphs -->
+        <div class="portrait-track" id="portrait-track">
+          <div class="portrait" id="portrait" aria-label="Portrait of Alif Adwitiya Pratama">
+            <div class="portrait__frame">
+              <div class="portrait__layer" data-depth="back">
+                <img id="portrait-img" alt="Alif Adwitiya Pratama" hidden />
+                <div class="portrait__placeholder" id="portrait-placeholder">
+                  Portrait asset pending.<br />Drop <span class="mono">assets/images/profile-cutout-single.webp</span>
+                </div>
+              </div>
+            </div>
+            <div class="portrait__deco" aria-hidden="true"></div>
+            <div class="portrait__tag" id="portrait-tag">OPERATOR // ONLINE</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 01 IDENTITY FILE ============ -->
+    <section class="section" id="identity-file" data-name="Identity File" aria-label="Profile">
+      <div class="section__inner">
+        <span class="section__index">01 / IDENTITY FILE</span>
+        <p class="section__story" data-story-beat>The person behind the model.</p>
+        <!-- One card: bio copy and quick facts share a single bordered surface. -->
+        <div class="identity-card reveal" id="profile-panel">
+          <div class="identity-card__body">
+            <div id="about-copy"></div>
+            <div class="tags" id="profile-tags" style="margin-top:var(--sp-4)">
+              <span class="tag">Jakarta, ID</span>
+              <span class="tag">AI &amp; Data</span>
+              <span class="tag">Leadership</span>
+            </div>
+          </div>
+          <ul class="identity-card__facts" id="profile-facts" aria-label="Quick facts">
+            <li class="identity-card__fact"><b id="stat-exp-years">2+</b><span>years at Bank Mandiri</span></li>
+            <li class="identity-card__fact"><b>16</b><span>people led in a technical team</span></li>
+            <li class="identity-card__fact"><b>AI &amp; Data</b><span>business + analytics + systems delivery</span></li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 02 HALL OF FAME ============ -->
+    <section class="section" id="hall-of-fame" data-name="Hall of Fame" aria-label="Hall of Fame">
+      <div class="section__inner">
+        <span class="section__index">02 / HALL OF FAME</span>
+        <p class="section__story" data-story-beat>Signals become evidence.</p>
+        <p class="hof__deck reveal">The receipts are in.</p>
+
+        <div class="hof__academic reveal" id="hof-academic"></div>
+
+        <div class="hof__group reveal">
+          <h3 class="hof__group-title">01 / Competitive Record</h3>
+          <ol class="hof__list" id="hof-awards"></ol>
+        </div>
+
+        <div class="hof__group reveal">
+          <h3 class="hof__group-title">02 / Research Files</h3>
+          <ol class="hof__list" id="hof-publications"></ol>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 03 SKILL ARSENAL ============ -->
+    <section class="section" id="skill-arsenal" data-name="Skill Arsenal" aria-label="Skills">
+      <div class="section__inner">
+        <span class="section__index">03 / SKILL ARSENAL</span>
+        <p class="section__story" data-story-beat>Tools are only useful in motion.</p>
+        <div id="skills-groups" class="skills reveal--stagger"></div>
+      </div>
+    </section>
+
+    <!-- ============ 04 MISSION LOG (3D timeline) ============ -->
+    <section class="section" id="mission-log" data-name="Mission Log" aria-label="Experience">
+      <div class="section__inner">
+        <span class="section__index">04 / MISSION LOG</span>
+        <p class="section__story" data-story-beat>Every role leaves a trace.</p>
+        <ol class="timeline reveal--editorial" id="timeline"></ol>
+        <!-- Single "See more on LinkedIn" link, rendered by ui.js at the end. -->
+        <div class="mission-log__more reveal" id="mission-log-more" style="margin-top:var(--sp-5)"></div>
+      </div>
+    </section>
+
+    <!-- ============ 05 CASE FILES (pinned only) ============ -->
+    <section class="section" id="case-files" data-name="Case Files" aria-label="Projects">
+      <div class="section__inner">
+        <span class="section__index">05 / CASE FILES</span>
+        <p class="section__story" data-story-beat>Evidence, not decoration.</p>
+
+        <div id="spotlight-slot" class="reveal"></div>
+
+        <div class="grid-cards reveal--editorial" id="projects-grid"></div>
+
+        <p class="lead reveal" id="case-note" style="margin-top:var(--sp-6)">
+          Only my pinned repositories are shown here. See everything on
+          <a class="accent" id="case-note-link" href="https://github.com/alifadwitiyap" rel="noopener" target="_blank">GitHub</a>.
+        </p>
+
+        <p class="case-disclosure" id="case-disclosure">Selected descriptions are intentionally generalized to respect confidentiality.</p>
+      </div>
+    </section>
+
+    <!-- ============ 06 OPEN CHANNEL ============ -->
+    <section class="section" id="open-channel" data-name="Open Channel" aria-label="Let's talk">
+      <div class="section__inner">
+        <span class="section__index">06 / OPEN CHANNEL</span>
+        <p class="section__story" data-story-beat>The next signal needs a receiver.</p>
+        <p class="contact__big reveal" id="contact-big">EVERY PROBLEM HIDES A TREASURE.<br />
+          Let's uncover yours</p>
+        <div class="contact__links reveal" id="contact-links">
+          <a class="btn btn--primary" href="https://www.linkedin.com/in/alifadwitiyap/" rel="noopener" target="_blank">LinkedIn</a>
+          <a class="btn" href="https://github.com/alifadwitiyap" rel="noopener" target="_blank">GitHub</a>
+          <a class="btn" href="mailto:alifadwitiyap@gmail.com">Email</a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <span class="tagline" id="footer-tagline">Built 4 Life[♥] — From real life needs to real life solutions.</span>
+    <span>© <span id="year"></span> Alif Adwitiya Pratama</span>
+  </footer>
+
+  <!-- Section HUD (discrete, names not numbers) -->
+  <div class="hud" aria-hidden="true">
+    <span class="hud__bar"><span class="hud__fill" id="hud-fill"></span></span>
+    <span class="hud__name" id="hud-name">Start</span>
+  </div>
+
+  <!-- Project dossier modal -->
+  <div class="modal" id="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title" hidden>
+    <div class="modal__box">
+      <button class="modal__close" id="modal-close" aria-label="Close">ESC ✕</button>
+      <div id="modal-body"></div>
+    </div>
+  </div>
+
+  <!-- ---------- Chapter menu OVERLAY (opened by MENU / key M) ---------- -->
+  <div class="chapter-menu" id="chapter-menu" role="dialog" aria-modal="true"
+       aria-labelledby="chapter-menu-title" hidden>
+    <div class="chapter-menu__scrim" data-menu-close></div>
+    <div class="chapter-menu__panel">
+      <header class="chapter-menu__head">
+        <span class="chapter-menu__kicker">4<span class="brand__heart">♥</span>LIFE // ARCHIVE</span>
+        <h2 class="chapter-menu__title" id="chapter-menu-title">Select Chapter</h2>
+        <button class="chapter-menu__close" id="chapter-menu-close" type="button"
+                aria-label="Close menu">ESC ✕</button>
+      </header>
+      <ol class="chapter-menu__list" id="chapter-menu-list" role="list"></ol>
+      <footer class="chapter-menu__hud" aria-hidden="true">↑↓ SELECT · ENTER OPEN · M / ESC CLOSE</footer>
+    </div>
+  </div>
+
+  <!-- ---------- Opening / loading screen (enhancement, skippable) ----------
+       `hidden` by default: js/intro.js removes it to show (so a no-JS visitor
+       is never locked behind the overlay, and a returning visitor gets no
+       flash). aria-modal is added by the module while it is actually open. -->
+  <div class="intro" id="intro" role="dialog" aria-label="Opening" hidden>
+    <div class="intro__inner">
+      <p class="intro__kicker">4<span class="brand__heart">♥</span>LIFE // INITIATING</p>
+      <p class="intro__title" aria-hidden="true">MISSION ARCHIVE</p>
+      <div class="intro__bar" aria-hidden="true"><span class="intro__bar-fill" id="intro-fill"></span></div>
+      <p class="intro__status" id="intro-status">PREPARING EXPERIENCE</p>
+      <button class="intro__skip btn" id="intro-skip" type="button">SKIP INTRO</button>
+    </div>
+  </div>
+
+  <script type="module" src="./js/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,895 @@
+/* ============================================================
+   components.css — hero, sticky portrait, panels, cards,
+   timeline, identity card, buttons, tags. Persona-5 look, original.
+   ============================================================ */
+
+/* ---------- Hero ---------- */
+/* The hero hugs its content instead of forcing 100vh: a full-viewport box with
+   the CTA ending at ~72% left ~250px of dead space below it, which read as a
+   gap before Identity File. */
+.hero {
+  min-height: auto;
+  justify-content: flex-start;
+  padding-top: clamp(4.5rem, 11vh, 7rem);
+  padding-bottom: clamp(1.5rem, 3vh, 2.5rem);
+}
+.hero__grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr);
+  gap: clamp(1.5rem, 4vw, 4rem);
+  align-items: start;
+}
+.hero__kicker {
+  font-family: var(--font-sub);
+  font-weight: 700;
+  letter-spacing: 0.34em;
+  text-transform: uppercase;
+  color: var(--accent);
+  font-size: var(--step--1);
+  margin-bottom: var(--sp-3);
+}
+.hero__name {
+  font-family: var(--font-hero);
+  /* scale with the viewport but also cap so the longest line ("ADWITIYA")
+     always fits its column — Anton is wide and overflows at pure vw sizes. */
+  font-size: clamp(2.4rem, 7.8vw, 6.8rem);
+  line-height: 0.84;
+  margin-bottom: var(--sp-5);
+  max-width: 100%;
+  overflow-wrap: break-word;
+  /* the skew/rotate are visual only; keep the box inside its column */
+  transform: skewX(-8deg) rotate(-1.5deg);
+  transform-origin: left center;
+  text-shadow: 6px 6px 0 #000, 11px 11px 0 var(--accent);
+}
+.hero__copy { min-width: 0; overflow: visible; }
+/* the visual slant must not widen the layout box */
+.hero__name { display: inline-block; }
+.hero__name .line2 { display: block; color: var(--accent); transition: color var(--t-med); }
+.hero__role {
+  font-family: var(--font-ui);
+  font-weight: 400;
+  font-size: var(--step-2);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--paper);
+  margin: calc(-1 * var(--sp-3)) 0 var(--sp-4);
+}
+.hero__tagline {
+  font-family: var(--font-sub);
+  font-weight: 500;
+  font-size: var(--step-1);
+  color: var(--paper);
+  max-width: 40ch;
+  margin-bottom: var(--sp-5);
+  border-left: 5px solid var(--accent);
+  padding-left: var(--sp-4);
+  transform: skewX(-6deg);
+}
+.hero__actions { display: flex; flex-wrap: wrap; gap: var(--sp-3); }
+
+/* ---------- Portrait stack ---------- */
+.portrait {
+  position: relative;
+  aspect-ratio: 4 / 5;
+  max-width: 430px;
+  margin-left: auto;
+  width: 100%;
+  transform-origin: center center;
+  /* morph state is driven by js/main.js via CSS vars */
+  --morph: 0;
+}
+.portrait__frame {
+  position: absolute;
+  inset: 0;
+  border: 3px solid var(--paper);
+  clip-path: var(--clip-panel);
+  background: var(--ink-2);
+  overflow: hidden;
+  box-shadow: var(--shadow-black);
+}
+.portrait__layer { position: absolute; inset: 0; }
+/* cover fills the frame; top alignment guarantees the head is never cropped */
+.portrait__layer img { width: 100%; height: 100%; object-fit: cover; object-position: center top; }
+.portrait__placeholder {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-content: center;
+  text-align: center;
+  font-family: var(--font-mono);
+  font-size: var(--step--1);
+  color: var(--muted);
+  padding: var(--sp-4);
+}
+/* [hidden] must win over the display:grid above */
+.portrait__placeholder[hidden] { display: none; }
+#portrait-img[hidden] { display: none; }
+
+/* Sticker-style decorations that intensify as the portrait morphs */
+.portrait__deco {
+  position: absolute;
+  inset: -16px -16px auto auto;
+  width: 46%;
+  height: 34%;
+  border: 3px solid var(--accent);
+  clip-path: polygon(0 0, 100% 0, 100% 70%, 70% 100%, 0 100%);
+  pointer-events: none;
+  transform: translate(calc(var(--morph) * 26px), calc(var(--morph) * -18px))
+             rotate(calc(var(--morph) * -6deg));
+}
+
+/* Mask-reveal (Task 06): a diagonal hazard-band that sweeps down over the
+   portrait as it morphs in. --morph is set by initPortraitMorph() on #portrait
+   and inherits here, so no extra JS is needed. At --morph:0 it is fully
+   clipped away (clean hero); under reduced-motion initPortraitMorph pins
+   --morph to 0, so the band stays hidden and the portrait is untouched. */
+.portrait__frame::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: repeating-linear-gradient(
+    -45deg,
+    transparent 0 18px,
+    var(--accent) 18px 22px
+  );
+  clip-path: inset(0 0 calc((1 - var(--morph, 0)) * 100%) 0);
+  opacity: calc(var(--morph, 0) * 0.5);
+  transition: clip-path 120ms linear, opacity 120ms linear;
+}
+.portrait__tag {
+  position: absolute;
+  left: -14px; bottom: 22px;
+  background: var(--accent);
+  color: var(--ink);
+  font-family: var(--font-ui);
+  font-size: var(--step-1);
+  letter-spacing: 0.14em;
+  padding: 2px var(--sp-3);
+  clip-path: var(--clip-tag);
+  box-shadow: var(--shadow-black);
+  transform: rotate(-3deg) translateX(calc(var(--morph) * -18px));
+  transition: background var(--t-med);
+}
+/* Extra sticker revealed mid-morph */
+.portrait__badge {
+  position: absolute;
+  right: -18px; bottom: 34%;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-ui);
+  font-size: var(--step-1);
+  letter-spacing: 0.1em;
+  padding: 2px var(--sp-3);
+  clip-path: var(--clip-badge);
+  box-shadow: 5px 5px 0 var(--red);
+  opacity: calc(var(--morph) * 1.4 - 0.2);
+  transform: rotate(4deg) translateY(calc((1 - var(--morph)) * 20px));
+  pointer-events: none;
+}
+
+/* ---------- Panels / cards ---------- */
+.panel {
+  background: var(--ink-card);
+  border: 3px solid var(--paper);
+  clip-path: var(--clip-panel);
+  padding: var(--sp-5);
+  box-shadow: var(--shadow-black);
+  backdrop-filter: blur(3px);
+}
+.panel--accent { border-color: var(--accent); }
+.panel--tilt { transform: rotate(-0.6deg); }
+
+.grid-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: var(--sp-5);
+}
+
+.card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  background: var(--ink-card);
+  border: 3px solid var(--paper);
+  clip-path: var(--clip-panel);
+  padding: var(--sp-5);
+  box-shadow: var(--shadow-black);
+  transition: transform var(--t-med) var(--ease-snap),
+              box-shadow var(--t-med), border-color var(--t-med);
+}
+.card:hover, .card:focus-within {
+  transform: translate(-4px, -4px) rotate(-0.5deg);
+  border-color: var(--accent);
+  box-shadow: 8px 8px 0 #000, 12px 12px 0 var(--accent);
+}
+.card__top {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--sp-2) var(--sp-3);
+  margin-bottom: var(--sp-3);
+}
+.card__title {
+  font-size: var(--step-1);
+  margin: 0;
+  min-width: 0;
+  overflow-wrap: break-word;
+  word-break: break-word;
+  hyphens: auto;
+}
+.card__lang {
+  font-family: var(--font-ui);
+  font-size: var(--step-1);
+  color: var(--accent);
+  white-space: nowrap;
+  letter-spacing: 0.06em;
+}
+.card__desc { color: var(--paper-dim); font-size: var(--step--1); margin-bottom: var(--sp-4); flex: 1 1 auto; }
+.card__meta {
+  display: flex;
+  gap: var(--sp-3);
+  font-family: var(--font-mono);
+  font-size: var(--step--1);
+  color: var(--muted);
+}
+/* equal-height cards: push the action to the bottom of every card */
+.card > .btn { margin-top: auto; align-self: flex-start; }
+.card--featured { border-color: var(--accent); }
+.card--featured::before {
+  content: "FEATURED";
+  position: absolute;
+  top: 0; right: 0;
+  background: var(--accent);
+  color: var(--ink);
+  font-family: var(--font-ui);
+  font-size: var(--step-0);
+  letter-spacing: 0.16em;
+  padding: 1px 12px;
+  clip-path: polygon(8px 0, 100% 0, 100% 100%, 0 100%);
+}
+
+/* Fork marker: a small sticker on the card, not a word glued onto the
+   language label. Top-left so it never collides with the FEATURED corner.
+   Fork cards reserve extra top padding so the sticker never overlaps the
+   title that follows. */
+.card--fork { padding-top: calc(var(--sp-5) + 1.4rem); }
+.card__fork {
+  position: absolute;
+  top: 0; left: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-ui);
+  font-size: var(--step-0);
+  line-height: 1.5;
+  letter-spacing: 0.16em;
+  padding: 0 12px;
+  clip-path: polygon(0 0, 100% 0, calc(100% - 8px) 100%, 0 100%);
+  box-shadow: 3px 3px 0 var(--accent);
+  pointer-events: none;
+}
+
+/* Featured spotlight (NDETCStemmer) */
+.spotlight {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.3fr);
+  gap: var(--sp-5);
+  align-items: center;
+  border: 3px solid var(--accent);
+  clip-path: var(--clip-panel);
+  padding: var(--sp-6);
+  margin-bottom: var(--sp-6);
+  background: var(--ink-card);
+  box-shadow: var(--shadow-black);
+}
+/* Spotlight: the PROJECT is the hero, not its star count. The name carries the
+   display size; the GitHub-stars metric is demoted to a compact meta chip so a
+   weak number can never out-shout the work.
+   The title is a single long word ("NDETCStemmer"), so it needs BOTH a size that
+   fits the narrow grid column at every breakpoint AND a wrap fallback — at
+   --step-4 the word rendered 1026px wide inside a 670px column and the card's
+   clip-path sliced it. */
+.spotlight h3 {
+  font-family: var(--font-hero);
+  font-size: clamp(1.5rem, 1.0rem + 2.4vw, 3.5rem); /* 24 → 56px, one line per column */
+  line-height: 0.95;
+  margin-bottom: var(--sp-3);
+  text-shadow: 5px 5px 0 #000, 8px 8px 0 var(--accent);
+  min-width: 0;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  hyphens: auto;
+}
+.spotlight__metric {
+  display: inline-flex;
+  align-items: baseline;
+  gap: var(--sp-2);
+  font-family: var(--font-ui);
+  font-size: var(--step-1);
+  color: var(--paper-dim);
+  line-height: 1.1;
+  border: 2px solid rgba(229, 30, 43, 0.4);
+  padding: var(--sp-2) var(--sp-3);
+  clip-path: var(--clip-tag);
+  text-shadow: none;
+}
+.spotlight__metric small {
+  display: inline;
+  font-family: var(--font-ui);
+  font-size: var(--step--1);
+  letter-spacing: 0.18em;
+  color: var(--muted);
+  margin-top: 0;
+  text-shadow: none;
+}
+
+/* ---------- Timeline (experience, 3D-ish nodes) ---------- */
+.timeline {
+  position: relative;
+  padding-left: clamp(1.5rem, 5vw, 3.5rem);
+}
+.timeline::before {
+  content: "";
+  position: absolute;
+  left: 8px; top: 0; bottom: 0;
+  width: 4px;
+  background: linear-gradient(180deg, var(--accent), var(--red-deep) 60%, transparent);
+}
+.tl-item {
+  position: relative;
+  margin-bottom: var(--sp-6);
+  padding: var(--sp-5);
+  background: var(--ink-card);
+  border: 3px solid var(--paper);
+  clip-path: var(--clip-panel-alt);
+  box-shadow: var(--shadow-black);
+  transform: perspective(900px) rotateY(-1.2deg);
+  transition: transform var(--t-med) var(--ease-snap), box-shadow var(--t-med), border-color var(--t-med);
+}
+.tl-item:hover, .tl-item:focus-within {
+  transform: perspective(900px) rotateY(0deg) translate(-3px, -3px);
+  border-color: var(--accent);
+  box-shadow: 7px 7px 0 #000, 11px 11px 0 var(--accent);
+}
+/* 3D node dot on the rail */
+.tl-item::before {
+  content: "";
+  position: absolute;
+  left: calc(-1 * clamp(1.5rem, 5vw, 3.5rem) + 1px);
+  top: 26px;
+  width: 18px; height: 18px;
+  background: var(--accent);
+  transform: rotate(45deg) translateZ(0);
+  box-shadow: 0 0 0 4px var(--ink), 0 0 14px 2px var(--accent);
+  transition: transform var(--t-med) var(--ease-snap), box-shadow var(--t-med);
+}
+.tl-item.is-active::before {
+  transform: rotate(45deg) scale(1.25);
+  box-shadow: 0 0 0 4px var(--ink), 0 0 22px 6px var(--accent);
+}
+.tl-item__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--sp-2) var(--sp-4);
+  margin-bottom: var(--sp-2);
+}
+.tl-item__role { font-family: var(--font-display); font-size: var(--step-2); margin: 0; }
+.tl-item__period {
+  font-family: var(--font-ui);
+  font-size: var(--step-1);
+  color: var(--accent);
+  letter-spacing: 0.08em;
+}
+.tl-item__org {
+  font-family: var(--font-sub);
+  font-weight: 700;
+  font-size: var(--step-0);
+  color: var(--paper);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.tl-item__meta {
+  font-family: var(--font-mono);
+  font-size: var(--step--1);
+  color: var(--muted);
+  margin-bottom: var(--sp-3);
+}
+.tl-item__points { margin: 0 0 var(--sp-3); }
+.tl-item__points li {
+  position: relative;
+  padding-left: 1.4em;
+  margin-bottom: var(--sp-2);
+  color: var(--paper-dim);
+  font-size: var(--step--1);
+}
+.tl-item__points li::before {
+  content: "▸";
+  position: absolute; left: 0;
+  color: var(--accent);
+}
+
+/* ---------- Identity card (ONE box: bio + quick facts) ----------
+   The old layout split the identity file into two separate boxes (a bio
+   panel and a statcard). This is a single card: the bio copy and the
+   quick-facts list are two regions of the same bordered surface, so the
+   section reads as one artifact instead of two competing ones. */
+.identity-card {
+  display: grid;
+  grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr);
+  gap: clamp(1.25rem, 3vw, 2.5rem);
+  align-items: start;
+  background: var(--ink-card);
+  border: 3px solid var(--accent);
+  clip-path: var(--clip-panel);
+  padding: var(--sp-5);
+  box-shadow: var(--shadow-black);
+  transform: rotate(-0.4deg);
+  backdrop-filter: blur(3px);
+}
+.identity-card__body { min-width: 0; }
+/* Quick-facts column: separated from the bio by a divider, not a second
+   card border, so the single-box read is preserved. */
+.identity-card__facts {
+  margin: 0;
+  padding-left: clamp(1.25rem, 3vw, 2.5rem);
+  border-left: 1px dashed var(--ink-3);
+}
+.identity-card__fact {
+  display: flex;
+  align-items: baseline;
+  gap: var(--sp-3);
+  padding: var(--sp-3) 0;
+  border-bottom: 1px dashed var(--ink-3);
+}
+.identity-card__fact:first-child { padding-top: 0; }
+.identity-card__fact:last-child { border-bottom: 0; padding-bottom: 0; }
+.identity-card__fact b {
+  font-family: var(--font-hero);
+  font-size: var(--step-2);
+  color: var(--accent);
+  line-height: 1;
+  min-width: 3.4ch;
+}
+.identity-card__fact span { color: var(--paper-dim); font-size: var(--step--1); }
+
+/* ---------- Tags / chips ---------- */
+.tags { display: flex; flex-wrap: wrap; gap: var(--sp-2); }
+.tag {
+  font-family: var(--font-ui);
+  font-size: var(--step-0);
+  letter-spacing: 0.08em;
+  padding: 1px 10px;
+  border: 2px solid var(--ink-3);
+  color: var(--paper-dim);
+  clip-path: var(--clip-tag);
+}
+/* Fork marker inside the project dossier modal. */
+.tag--fork {
+  background: var(--paper);
+  border-color: var(--paper);
+  color: var(--ink);
+}
+
+/* ---------- Buttons ---------- */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-2);
+  font-family: var(--font-ui);
+  font-size: var(--step-1);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: var(--sp-2) var(--sp-5);
+  border: 3px solid var(--paper);
+  color: var(--paper);
+  background: var(--ink-2);
+  clip-path: var(--clip-btn);
+  box-shadow: var(--shadow-black);
+  transition: transform var(--t-fast) var(--ease-snap),
+              background var(--t-fast), color var(--t-fast), border-color var(--t-fast),
+              box-shadow var(--t-fast);
+}
+.btn:hover, .btn:focus-visible {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--ink);
+  transform: translate(-3px, -3px);
+  box-shadow: 6px 6px 0 #000, 9px 9px 0 var(--paper);
+}
+.btn--primary {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--ink);
+  box-shadow: var(--shadow-black), 6px 6px 0 var(--paper);
+}
+.btn--primary:hover { background: var(--paper); border-color: var(--paper); }
+
+/* ---------- Skills ---------- */
+.skills__group { margin-bottom: var(--sp-5); }
+.skills__group h3 {
+  font-size: var(--step-2);
+  color: var(--accent);
+  margin-bottom: var(--sp-3);
+  text-shadow: 3px 3px 0 #000;
+}
+
+/* ---------- Hall of Fame (achievements dossier) ---------- */
+.hof__deck {
+  font-family: var(--font-ui);
+  font-size: var(--step-1);
+  letter-spacing: 0.04em;
+  color: var(--paper-dim);
+  margin: calc(-1 * var(--sp-3)) 0 var(--sp-6);
+}
+
+.hof__academic { margin-bottom: var(--sp-7); }
+
+.hof-academic {
+  display: grid;
+  grid-template-columns: minmax(200px, 260px) 1fr;
+  gap: var(--sp-5);
+  align-items: stretch;
+  background: var(--ink-card);
+  border: 3px solid var(--accent);
+  clip-path: var(--clip-panel);
+  box-shadow: var(--shadow-hard);
+}
+
+/* The "stamp": rotated, hard-edged, the one loud element in the dossier. */
+.hof-academic__stamp {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: var(--sp-2);
+  padding: var(--sp-5);
+  background: var(--accent);
+  color: var(--ink);
+  transform: rotate(-1.4deg);
+  margin: calc(-1 * var(--sp-3)) 0 calc(-1 * var(--sp-3)) calc(-1 * var(--sp-3));
+  clip-path: var(--clip-panel-alt);
+}
+.hof-academic__stamp-label {
+  font-family: var(--font-ui);
+  font-size: var(--step-1);
+  line-height: 1;
+  text-transform: uppercase;
+}
+.hof-academic__gpa {
+  display: flex;
+  align-items: baseline;
+  gap: var(--sp-2);
+  font-family: var(--font-hero);
+}
+.hof-academic__gpa b { font-size: var(--step-3); line-height: 0.9; }
+.hof-academic__gpa small {
+  font-family: var(--font-ui);
+  font-size: var(--step--1);
+}
+
+.hof-academic__body { padding: var(--sp-5) var(--sp-5) var(--sp-5) 0; }
+.hof-academic__degree {
+  font-family: var(--font-display);
+  font-size: var(--step-2);
+  margin: 0 0 var(--sp-2);
+  text-shadow: 3px 3px 0 #000;
+}
+.hof-academic__school {
+  font-family: var(--font-sub);
+  font-size: var(--step-0);
+  color: var(--paper-dim);
+  margin-bottom: var(--sp-3);
+}
+.hof-academic__thesis {
+  font-size: var(--step--1);
+  color: var(--paper-dim);
+  overflow-wrap: anywhere;
+}
+.hof-academic__kicker {
+  font-family: var(--font-ui);
+  color: var(--accent);
+  letter-spacing: 0.06em;
+  margin-right: var(--sp-2);
+}
+
+.hof__group { margin-bottom: var(--sp-6); }
+.hof__group-title {
+  font-family: var(--font-ui);
+  font-size: var(--step-1);
+  letter-spacing: 0.05em;
+  color: var(--accent);
+  margin-bottom: var(--sp-3);
+  padding-bottom: var(--sp-2);
+  border-bottom: 3px solid var(--accent);
+}
+
+.hof__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  background: var(--ink-card);
+  border: 3px solid var(--paper);
+  clip-path: var(--clip-panel);
+  box-shadow: var(--shadow-black);
+  backdrop-filter: blur(3px);
+}
+
+.hof-item {
+  display: grid;
+  grid-template-columns: 8.5rem minmax(0, 1fr) auto auto;
+  align-items: baseline;
+  gap: var(--sp-2) var(--sp-4);
+  padding: var(--sp-4) var(--sp-3);
+  border-bottom: 1px solid rgba(247, 244, 234, 0.14);
+  transition: background var(--t-fast), border-color var(--t-fast);
+}
+.hof-item:last-child { border-bottom: 0; }
+.hof-item:hover,
+.hof-item:focus-within {
+  background: rgba(229, 30, 43, 0.08);
+  border-bottom-color: var(--accent);
+}
+/* Keep the row layout that `display: contents` used to give, but on the <a>
+   itself: an element with `display: contents` has no box, so it can never
+   take focus (`.focus()` is a no-op and Tab skips it) — which left both DOI
+   links keyboard-unreachable. Making the anchor the grid item keeps the
+   badge/title/venue/year columns exactly where they were and gives the link
+   a real, focusable box plus a visible focus ring via the global
+   `:focus-visible` rule. */
+.hof-item--link a {
+  display: grid;
+  grid-template-columns: subgrid;
+  grid-column: 1 / -1;
+  align-items: baseline;
+  gap: var(--sp-2) var(--sp-4);
+  color: inherit;
+  text-decoration: none;
+  border-radius: 2px;
+}
+.hof-item--link:hover .hof-item__title { color: var(--accent); }
+
+.hof-item__rank,
+.hof-item__badge {
+  font-family: var(--font-ui);
+  font-size: var(--step--1);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--ink);
+  background: var(--accent);
+  padding: 2px var(--sp-2);
+  justify-self: start;
+  clip-path: var(--clip-tag);
+}
+.hof-item__title {
+  font-family: var(--font-sub);
+  font-size: var(--step-0);
+  overflow-wrap: anywhere;
+  transition: color var(--t-fast);
+}
+.hof-item__org {
+  font-size: var(--step--1);
+  color: var(--paper-dim);
+  overflow-wrap: anywhere;
+}
+.hof-item__year {
+  font-family: var(--font-mono);
+  font-size: var(--step--1);
+  color: var(--muted);
+}
+
+/* Experience "see more" link */
+.tl-item__more {
+  display: inline-block;
+  margin-top: var(--sp-3);
+  font-family: var(--font-ui);
+  font-size: var(--step--1);
+  letter-spacing: 0.05em;
+  color: var(--accent);
+  text-decoration: none;
+  border-bottom: 2px solid var(--accent);
+}
+.tl-item__more:hover,
+.tl-item__more:focus-visible { color: var(--paper); border-color: var(--paper); }
+
+/* ---------- Contact ---------- */
+.contact__links { display: flex; flex-wrap: wrap; gap: var(--sp-4); margin-top: var(--sp-5); }
+.contact__big {
+  font-family: var(--font-display);
+  font-size: var(--step-4);
+  line-height: 0.9;
+  margin-bottom: var(--sp-5);
+  text-shadow: 5px 5px 0 #000, 8px 8px 0 var(--accent);
+}
+
+/* ---------- Modal (project dossier) ---------- */
+.modal {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  display: grid;
+  place-items: center;
+  padding: var(--gutter);
+  background: rgba(4, 4, 6, 0.86);
+  backdrop-filter: blur(4px);
+}
+.modal[hidden] { display: none; }
+.modal__box {
+  width: min(680px, 100%);
+  max-height: 84vh;
+  overflow: auto;
+  background: var(--ink-2);
+  border: 3px solid var(--accent);
+  clip-path: var(--clip-panel);
+  padding: var(--sp-6);
+  box-shadow: var(--shadow-hard-sm);
+}
+.modal__close {
+  float: right;
+  font-family: var(--font-ui);
+  font-size: var(--step-1);
+  border: 2px solid var(--paper);
+  padding: 0 var(--sp-3);
+  clip-path: var(--clip-tag);
+}
+.modal__close:hover { background: var(--accent); color: var(--ink); border-color: var(--accent); }
+
+/* ---------- MENU trigger (topbar) ---------- */
+.menu-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-2);
+  font-family: var(--font-ui);
+  font-size: var(--step-1);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: var(--sp-2) var(--sp-4);
+  color: var(--paper);
+  background: var(--ink-2);
+  border: 3px solid var(--paper);
+  clip-path: var(--clip-btn);
+  box-shadow: var(--shadow-black);
+  transition: transform var(--t-fast) var(--ease-snap), color var(--t-fast),
+              border-color var(--t-fast), box-shadow var(--t-fast);
+}
+.menu-btn:hover,
+.menu-btn:focus-visible {
+  color: var(--accent);
+  border-color: var(--accent);
+  transform: translate(-2px, -2px);
+  box-shadow: 4px 4px 0 #000, 7px 7px 0 var(--accent);
+}
+/* bars follow currentColor so they track the hover colour */
+.menu-btn__bars {
+  position: relative;
+  display: block;
+  width: 22px;
+  height: 3px;
+  background: currentColor;
+  transition: background var(--t-fast);
+}
+.menu-btn__bars::before,
+.menu-btn__bars::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  width: 100%;
+  height: 3px;
+  background: currentColor;
+  transition: top var(--t-med) var(--ease-snap), transform var(--t-med) var(--ease-snap);
+}
+.menu-btn__bars::before { top: -7px; }
+.menu-btn__bars::after { top: 7px; }
+
+/* ============================================================
+   EVIDENCE-FIRST CASE FILES + HERO CTA + A11Y  (2026-10-05)
+   Added for the portfolio improvement wave: a case-study block
+   (Problem / Role / Approach / optional Outcome + proof links + why)
+   rendered by js/ui.js from each project's optional `caseFile`, a
+   primary hero CTA, a confidentiality disclosure, and two baseline
+   accessibility rules (focus-visible + anchor offset under the topbar).
+   ============================================================ */
+
+/* --- Hero primary CTA: reuse the existing .btn--primary look, just sit first --- */
+.hero__cta {
+  /* .btn--primary already carries the accent fill; only nudge spacing so it
+     reads as the leading action without restyling the shared button. */
+  margin-right: var(--sp-2);
+}
+
+/* --- Confidentiality disclosure under Case Files --- */
+.case-disclosure {
+  margin-top: var(--sp-5);
+  font-family: var(--font-mono);
+  font-size: var(--step--1);
+  letter-spacing: 0.04em;
+  color: var(--muted);
+  border-left: 3px solid var(--accent);
+  padding-left: var(--sp-3);
+}
+
+/* --- Case-study block (shared shape; spotlight/card differ only by prefix) --- */
+.spotlight__case,
+.card__case {
+  margin-top: var(--sp-4);
+  display: grid;
+  gap: var(--sp-2);
+  border-top: 2px solid rgba(229, 30, 43, 0.35);
+  padding-top: var(--sp-3);
+}
+
+.spotlight__case-row,
+.card__case-row {
+  display: grid;
+  grid-template-columns: minmax(88px, 116px) 1fr;
+  gap: var(--sp-3);
+  align-items: baseline;
+}
+
+.spotlight__case-label,
+.card__case-label {
+  font-family: var(--font-ui);
+  font-size: var(--step--1);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.spotlight__case-value,
+.card__case-value {
+  font-size: var(--step--1);
+  color: var(--paper-dim);
+  line-height: 1.5;
+}
+
+.spotlight__proof,
+.card__proof {
+  list-style: none;
+  margin: var(--sp-2) 0 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-2) var(--sp-4);
+}
+
+.spotlight__proof a,
+.card__proof a {
+  font-family: var(--font-mono);
+  font-size: var(--step--1);
+  color: var(--accent);
+  text-decoration: none;
+  border-bottom: 2px solid var(--accent);
+}
+
+.spotlight__why,
+.card__why {
+  margin: var(--sp-2) 0 0;
+  font-style: italic;
+  font-size: var(--step--1);
+  color: var(--paper);
+}
+
+@media (max-width: 620px) {
+  .spotlight__case-row,
+  .card__case-row { grid-template-columns: 1fr; gap: var(--sp-1); }
+}
+
+/* --- Accessibility: visible focus + anchors clear the fixed topbar --- */
+:focus-visible {
+  outline: 3px solid var(--paper);
+  outline-offset: 3px;
+}
+/* Keep the accent ring on dark surfaces legible. */
+a:focus-visible,
+button:focus-visible,
+[tabindex]:focus-visible {
+  outline-color: var(--accent);
+}
+
+section[id] {
+  /* The topbar is fixed and measures ~80px tall; this offset clears it with
+     breathing room so a hash target's heading is never hidden behind it. */
+  scroll-margin-top: 6rem; /* 96px */
+}
